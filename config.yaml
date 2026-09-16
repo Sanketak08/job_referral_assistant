@@ -1,0 +1,577 @@
+# ============================================================
+# CANDIDATE PROFILE
+# ============================================================
+
+candidate:
+  personal:
+    name: "Sanket Kulkarni"
+    current_title: "Software Engineer II"
+    current_company: "TraceLink, Inc"
+    location:
+      city: "Pune"
+      country: "India"
+
+  experience:
+    total_years: 3
+    backend_years: 3
+    distributed_systems_years: 3
+    data_engineering_years: 3
+
+  contact:
+    email: "sakulkarni0801@gmail.com"
+    contact: "+919921167376"
+    linkedin_url: "https://www.linkedin.com/in/sanket-a-kulkarni/"
+    portfolio_url: "https://sanketkulkarni.netlify.app"
+    github_url: "https://github.com/Sanketak08"
+
+  education:
+    degree: "B.E."
+    field: "Computer Engineering"
+    university: "Pune Institute of Computer Technology"
+    cgpa: 9.22
+
+  resume:
+    path: "./data/resume.pdf"
+
+  profile_summary: >
+    Software Engineer II with nearly 3 years of experience building
+    high-throughput microservices and event-driven data pipelines.
+    Strong backend background in Java, Spring Boot, Kafka, PostgreSQL,
+    AWS, distributed systems, and scalable data processing. Experienced
+    in production reliability, asynchronous communication, ETL/data
+    pipelines, and internal GenAI/LLM tooling.
+
+# ============================================================
+# TARGET JOBS
+# ============================================================
+
+job_search:
+  target_titles:
+    primary:
+      - "Backend Engineer"
+      - "Software Engineer"
+      - "Software Engineer II"
+      - "Backend Software Engineer"
+      - "Java Backend Engineer"
+      - "Java Software Engineer"
+
+    secondary:
+      - "Data Engineer"
+      - "Platform Engineer"
+      - "Distributed Systems Engineer"
+      - "Cloud Engineer"
+      - "Machine Learning Platform Engineer"
+      - "AI Platform Engineer"
+
+  exclude_titles:
+    - "Frontend Engineer"
+    - "Frontend Developer"
+    - "Mobile Engineer"
+    - "React Developer"
+    - "React Native Developer"
+    - "Android Developer"
+    - "iOS Developer"
+    - "QA Engineer"
+    - "Manual Tester"
+    - "Automation Tester"
+    - "UI/UX Designer"
+
+  seniority:
+    - "Mid-Senior"
+    - "Senior"
+    - "Software Engineer II"
+
+  experience:
+    min_years: 2
+    max_years: 6
+
+  freshness:
+    max_age_hours: 30
+
+# ============================================================
+# SKILLS
+# ============================================================
+
+skills:
+  must_have:
+    - "Java"
+
+  core_backend:
+    - "Java"
+    - "Spring Boot"
+    - "Spring Framework"
+    - "Spring MVC"
+    - "RxJava"
+    - "Microservices"
+    - "REST APIs"
+    - "Kafka"
+    - "Distributed Systems"
+    - "Asynchronous Messaging"
+    - "Inter-service Communication"
+    - "API Design"
+    - "Hibernate"
+    - "JPA"
+    - "Maven"
+    - "Gradle"
+
+  core_data_cloud:
+    - "Apache Kafka"
+    - "Apache Spark"
+    - "AWS"
+    - "AWS S3"
+    - "AWS Glue"
+    - "AWS Athena"
+    - "Amazon Redshift"
+    - "Amazon Aurora"
+    - "Amazon Kinesis"
+    - "Apache Airflow"
+    - "ETL"
+    - "Data Pipelines"
+    - "Event-driven Architecture"
+    - "Data Processing"
+
+  databases_storage:
+    - "PostgreSQL"
+    - "MongoDB"
+    - "Elasticsearch"
+    - "Amazon Redshift"
+    - "Amazon Aurora"
+
+  testing_quality:
+    - "JUnit 5"
+    - "Mockito"
+    - "Test Coverage"
+    - "Production Reliability"
+    - "Debugging"
+    - "Code Review"
+
+  cloud_native_devops:
+    - "Docker"
+    - "Kubernetes"
+    - "Jenkins"
+    - "CI/CD"
+    - "Grafana"
+    - "Prometheus"
+    - "Kibana"
+    - "Cloud Native"
+    - "Linux"
+    - "Git"
+
+  genai_llm:
+    - "LangGraph"
+    - "Qdrant"
+    - "Mem0"
+    - "LangFuse"
+    - "LLM Observability"
+    - "LLM Orchestration"
+    - "OpenAI APIs"
+    - "Anthropic APIs"
+    - "GenAI"
+
+  secondary:
+    - "GraphQL"
+    - "Node.js"
+    - "Express.js"
+    - "JavaScript"
+    - "Python"
+    - "C++"
+    - "Kotlin"
+
+  frontend_mobile:
+    - "ReactJS"
+    - "Next.js"
+    - "React Native"
+    - "Redux"
+    - "Firebase"
+    - "WebSockets"
+
+  aliases:
+    "Spring": ["Spring Framework", "Spring Boot", "Spring MVC"]
+    "Kafka": ["Apache Kafka", "Kafka Streams", "event streaming"]
+    "REST": ["REST APIs", "RESTful APIs"]
+    "Microservices": ["Microservice Architecture", "Service-oriented architecture"]
+    "Distributed Systems": ["Distributed Computing", "Distributed Architecture"]
+    "AWS S3": ["S3", "Amazon S3", "Simple Storage Service"]
+    "AWS Glue": ["Glue", "Amazon Glue"]
+    "PostgreSQL": ["Postgres", "PostgreSQL"]
+    "Kubernetes": ["K8s"]
+    "CI/CD": ["Continuous Integration", "Continuous Delivery", "Continuous Deployment"]
+    "LLM": ["Large Language Models", "Generative AI", "GenAI"]
+
+# ============================================================
+# TARGET EUROPEAN LOCATIONS
+# ============================================================
+
+locations:
+  countries:
+    Germany:
+      enabled: true
+      regions:
+        - "Berlin"
+        - "Munich"
+        - "Hamburg"
+        - "Frankfurt"
+        - "Cologne"
+
+    Netherlands:
+      enabled: true
+      regions:
+        - "Amsterdam"
+        - "Eindhoven"
+        - "Rotterdam"
+        - "Utrecht"
+
+    Hungary:
+      enabled: true
+      regions:
+        - "Budapest"
+
+    Poland:
+      enabled: true
+      regions:
+        - "Warsaw"
+        - "Krakow"
+        - "Wroclaw"
+
+    Belgium:
+      enabled: true
+      regions:
+        - "Brussels"
+        - "Antwerp"
+
+    Sweden:
+      enabled: true
+      regions:
+        - "Stockholm"
+        - "Gothenburg"
+
+  work_mode:
+    remote: false
+    hybrid: true
+    onsite: true
+
+  relocation:
+    willing_to_relocate: true
+
+# ============================================================
+# WORK AUTHORIZATION
+# ============================================================
+
+work_authorization:
+  current_country: "India"
+  needs_sponsorship: true
+
+  preferred:
+    - "Visa sponsorship"
+    - "Work permit sponsorship"
+    - "Relocation support"
+
+  sponsorship_matching:
+    explicit_sponsorship: "high_priority"
+    unclear_sponsorship: "do_not_auto_reject"
+    no_sponsorship: "strong_penalty"
+
+# ============================================================
+# JOB MATCHING
+# ============================================================
+
+matching:
+  minimum_score: 70
+
+  priority_thresholds:
+    high: 90
+    medium: 80
+    low: 70
+
+  weights:
+    technical_skills: 40
+    experience: 15
+    role_title: 15
+    location: 10
+    sponsorship: 15
+    other: 5
+
+  skill_group_weights:
+    core_backend: 1.00
+    core_data_cloud: 0.95
+    databases_storage: 0.85
+    cloud_native_devops: 0.80
+    testing_quality: 0.70
+    genai_llm: 0.65
+    secondary: 0.45
+    frontend_mobile: 0.15
+
+  strong_match_signals:
+    - "Java"
+    - "Spring Boot"
+    - "Kafka"
+    - "Microservices"
+    - "Distributed Systems"
+    - "AWS"
+    - "PostgreSQL"
+    - "Apache Spark"
+    - "AWS Glue"
+    - "Event-driven Architecture"
+
+  negative_match_signals:
+    - "Frontend-only"
+    - "Mobile-only"
+    - "React-only"
+    - "iOS-only"
+    - "Android-only"
+
+# ============================================================
+# PEOPLE DISCOVERY
+# ============================================================
+
+people_search:
+  provider: "tavily"
+
+  endpoint_env: "SEARCH_API_URL"
+  api_key_env: "SEARCH_API_KEY"
+  auth_header_env: "SEARCH_API_AUTH_HEADER"
+
+  max_results_per_query: 10
+  max_queries: 8
+
+  preferred_queries:
+    - '"{company}" "{city}" "Engineering Manager"'
+    - '"{company}" "{city}" "Backend Engineering Manager"'
+    - '"{company}" "{city}" "Engineering Lead"'
+    - '"{company}" "{city}" "Software Engineering Manager"'
+    - '"{company}" "{country}" "Technical Recruiter"'
+    - '"{company}" "{country}" "Internal Recruiter"'
+    - '"{company}" "{city}" "Backend Engineer"'
+    - '"{company}" "{city}" "Java Engineer"'
+
+# ============================================================
+# REFERRAL CONTACT RANKING
+# ============================================================
+
+referral:
+  max_contacts_to_return: 3
+  max_contacts_per_company: 2
+
+  preferred_roles:
+    - "Hiring Manager"
+    - "Engineering Manager"
+    - "Backend Engineering Manager"
+    - "Engineering Lead"
+    - "Technical Recruiter"
+    - "Internal Recruiter"
+    - "Senior Backend Engineer"
+    - "Senior Software Engineer"
+    - "Tech Lead"
+
+  excluded_roles:
+    - "Sales"
+    - "Marketing"
+    - "Finance"
+    - "Office Manager"
+    - "Intern"
+    - "Frontend-only Engineer"
+    - "Mobile-only Engineer"
+
+  ranking:
+    hiring_manager: 100
+    engineering_manager: 95
+    backend_engineering_manager: 95
+    engineering_lead: 90
+    technical_recruiter: 85
+    internal_recruiter: 82
+    tech_lead: 88
+    senior_backend_engineer: 80
+    senior_software_engineer: 75
+    other_engineer: 50
+
+  same_city_bonus: 10
+  same_country_bonus: 5
+
+# ============================================================
+# APOLLO
+# ============================================================
+
+apollo:
+  enabled: false
+  api_key_env: "APOLLO_API_KEY"
+
+  # Apollo is ONLY used for business-email enrichment.
+  purpose: "business_email_enrichment"
+
+  enrich_top_n: 3
+  reveal_personal_emails: false
+  reveal_phone_numbers: false
+
+  never_guess_email: true
+  require_verified_email: true
+
+# ============================================================
+# GEMINI
+# ============================================================
+
+gemini:
+  api_key_env: "GEMINI_API_KEY"
+
+  models:
+    extraction:
+      - "gemini-3.5-flash"
+      - "gemini-3.1-flash-lite"
+      - "gemini-3.8-flash"
+      - "gemini-3.7-flash"
+    ranking:
+      - "gemini-3.5-flash"
+      - "gemini-3.1-flash-lite"
+      - "gemini-3.8-flash"
+      - "gemini-3.7-flash"
+    writing:
+      - "gemini-3.5-flash"
+      - "gemini-3.1-flash-lite"
+      - "gemini-3.8-flash"
+      - "gemini-3.7-flash"
+
+  temperature:
+    extraction: 0.1
+    ranking: 0.2
+    writing: 0.5
+
+# ============================================================
+# OUTREACH
+# ============================================================
+
+outreach:
+  language: "English"
+
+  max_email_words: 160
+  max_linkedin_words: 80
+
+  style:
+    professional: true
+    concise: true
+    confident: true
+    friendly: true
+    direct: true
+    natural: true
+
+  include:
+    job_title: true
+    company_name: true
+    relevant_skills: true
+    contact_role: true
+    one_specific_alignment_point: true
+    relevant_project_or_impact: true
+
+  avoid:
+    generic_opening: true
+    excessive_flattery: true
+    resume_dump: true
+    long_paragraphs: true
+    exaggerated_claims: true
+
+  avoid_phrases:
+    - "Hope you're doing well"
+    - "I am reaching out to express my interest"
+    - "dream company"
+    - "passionate about"
+    - "I would be extremely grateful"
+    - "I was thrilled to come across"
+    - "I believe I would be a perfect fit"
+
+  referral_request:
+    direct: true
+    polite: true
+    ask_for_referral_if_employee: true
+
+# ============================================================
+# EMAIL / GMAIL
+# ============================================================
+
+email:
+  provider: "gmail"
+  from_name: "Sanket Kulkarni"
+
+  max_emails_per_job: 1
+  max_emails_per_company: 1
+
+  auto_send: false
+  require_approval: true
+
+# ============================================================
+# LINKEDIN
+# ============================================================
+
+linkedin:
+  enabled: true
+  generate_message: true
+
+  auto_send: false
+  require_manual_send: true
+
+# ============================================================
+# SAFETY / QUALITY
+# ============================================================
+
+safety:
+  minimum_contact_confidence: 0.85
+  minimum_company_match: 0.80
+
+  never_guess_email: true
+  skip_personal_email: true
+
+  skip_generic_email:
+    - "info@"
+    - "support@"
+    - "admin@"
+    - "contact@"
+    - "hello@"
+
+  duplicate_contact_check: true
+  maximum_outreach_per_company: 2
+  require_business_email: true
+
+# ============================================================
+# TRACKING
+# ============================================================
+
+tracking:
+  database: "sqlite"
+
+  save:
+    - "job"
+    - "company"
+    - "contact"
+    - "email"
+    - "linkedin_message"
+    - "timestamp"
+    - "status"
+
+  statuses:
+    - "discovered"
+    - "matched"
+    - "contact_found"
+    - "email_found"
+    - "drafted"
+    - "approved"
+    - "sent"
+    - "replied"
+    - "rejected"
+    - "do_not_contact"
+
+# ============================================================
+# SYSTEM
+# ============================================================
+
+system:
+  timezone: "Asia/Kolkata"
+
+  dry_run: true
+
+  logging:
+    level: "INFO"
+
+  retry:
+    max_attempts: 3
+    backoff_seconds: 2
+
+  output:
+    save_run_history: true
+    history_path: "./data/run_history.jsonl"
