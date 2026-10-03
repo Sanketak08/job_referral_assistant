@@ -1,0 +1,588 @@
+# ============================================================
+# CANDIDATE PROFILE (TEMPLATE)
+# Copy this file to input/profile.yaml and fill in your own values.
+# input/profile.yaml is gitignored; only this template is committed.
+# Leave a value empty ("") if it does not apply. Never commit real data here.
+# ============================================================
+
+candidate:
+  personal:
+    name: ""
+    current_title: ""
+    gender: ""
+    pronoun: ""                 # e.g. "He/Him/His", "She/Her/Hers", "They/Them/Theirs"
+    current_company: ""
+    location:
+      city: ""
+      country: ""
+
+  experience:
+    total_years: 0
+    backend_years: 0
+    distributed_systems_years: 0
+    data_engineering_years: 0
+
+  salary:
+    expectation: ""             # e.g. "60,000 EUR"
+
+  application_consent:
+    accept_terms_and_conditions: true
+    retain_data_for_future_opportunities: true
+    consent_statement: "I agree to the terms and conditions and explicitly consent to my data being retained and processed for consideration in current and future opportunities."
+
+  contact:
+    primary_email: ""
+    secondary_email: ""
+    phone: ""                   # international format, e.g. "+491234567890"
+    linkedin_url: ""
+    portfolio_url: ""
+    github_url: ""
+
+  education:
+    degree: ""
+    field: ""
+    university: ""
+    cgpa: ""
+
+  resume:
+    path: ""                    # absolute path to your resume PDF, e.g. "C:\\Users\\you\\resume.pdf"
+
+  profile_summary: >
+    Two or three sentences summarising your experience, main stack and strengths.
+
+  # Answers to recurring application-form questions (used by job-application-phase
+  # before it treats a question as unknown). Add new answers here when you supply them.
+  application_answers:
+    salary:
+      current_ctc: ""
+      current_salary_note: ""
+      expected_salary_gbp: 0
+      expected_salary_eur: 0
+    notice_period: ""           # earliest start date = today + notice period
+    open_to_office_days_per_week: 0
+    work_authorization_answers:
+      country_of_residence: ""
+      currently_living_in_uk: false
+      uk_eligibility: ""        # e.g. "I require sponsorship to work in the United Kingdom"
+      eu_eligibility: ""        # e.g. "I require sponsorship"
+      postcode_when_not_in_target_country: "N/A"
+    languages:
+      English: ""
+      German: ""
+    diversity:                  # optional; use "Prefer not to say" where you do not want to answer
+      gender: ""
+      pronouns: ""
+      sexual_orientation: ""
+      gender_matches_sex_at_birth: ""
+      age: ""
+      age_range: ""
+      ethnicity: ""
+      religion: ""
+      disability: ""
+      caring_responsibilities: ""
+    employer_specific:
+      current_customer_of_applied_company: "No"
+      involved_in_company_audit: "No"
+      employed_by_company_audit_firm: "No"
+    diversity_extra:
+      first_generation_university: ""
+      hispanic_latin_american: ""
+      veteran_status: ""
+    default_tech_checkboxes: []   # e.g. ["Java", "Python", "AWS"]
+    how_did_you_hear: "Career site"
+
+# ============================================================
+# TARGET JOBS
+# ============================================================
+
+job_search:
+  target_titles:
+    primary: []                 # e.g. "Backend Engineer", "Software Engineer"
+    secondary: []               # e.g. "Data Engineer", "Platform Engineer"
+
+  exclude_titles: []            # e.g. "Frontend Engineer", "QA Engineer"
+
+  seniority: []                 # e.g. "Mid-Senior", "Senior"
+
+  experience:
+    min_years: 0
+    max_years: 0
+    # Hard filter: discard any job whose REQUIRED experience is >= this value
+    # (e.g. "5+ years", "minimum 5 years", "6-8 years"). Ranges use their lower bound.
+    reject_if_required_years_gte: 5
+    # Regexes the skill applies to title + description to detect required years.
+    detection_patterns:
+      - '(\d{1,2})\s*\+\s*(?:years|yrs|jahre|jaar|lat|år)'
+      - '(?:at least|minimum(?: of)?|min\.?|mindestens|minstens|co najmniej)\s*(\d{1,2})\s*(?:years|yrs|jahre|jaar|lat|år)'
+      - '(\d{1,2})\s*(?:-|–|to)\s*\d{1,2}\s*(?:years|yrs|jahre|jaar|lat|år)'
+      - '(\d{1,2})\s*(?:years|yrs|jahre|jaar|lat|år)[^.\n]{0,40}(?:experience|erfahrung|ervaring|doświadczenia)'
+    # Titles implying too much seniority; rejected even if no year count is stated.
+    reject_title_keywords:
+      - "Staff"
+      - "Principal"
+      - "Lead"
+      - "Head of"
+      - "Architect"
+      - "Director"
+      - "Distinguished"
+    # If no year count can be found: "keep" scores on title/seniority only.
+    unknown_experience_action: "keep"
+
+  freshness:
+    max_age_hours: 24          # hard filter; jobs older than this are discarded before scoring
+    date_only_sources_action: "keep_if_today_or_yesterday"
+
+  # Language filter: list only the languages you speak.
+  language:
+    spoken: ["English"]
+    drop_non_english_postings: true
+    required_language_patterns:         # drop the job when one of these matches and it is not marked optional
+      - '(?i)(fluent|proficient|native|business[- ]level|excellent|very good|good|strong|advanced|solid|sehr gute)\s+(in\s+)?(written\s+and\s+spoken\s+)?(german|deutsch)'
+      - '(?i)(german|deutsch)(e|en)?\s*(language\s+)?(skills|proficiency|speaker|fluency|knowledge|kenntnisse)'
+      - '(?i)(german|deutsch)\s*(\(|:|-)?\s*(b2|c1|c2)'
+      - '(?i)sicher\s+auf\s+deutsch|fließend\s+deutsch|verhandlungssicher'
+      - '(?i)(dutch|nederlands|french|français|spanish|español|polish|polski|italian)\s+(language\s+)?(is\s+)?(required|mandatory|fluent|fluency|native)'
+    optional_markers: ["plus", "bonus", "advantage", "nice to have", "beneficial", "desirable", "not required", "preferred", "a plus", "von vorteil"]
+
+  # ----------------------------------------------------------
+  # JOB DISCOVERY (executed tier by tier, in `order`)
+  # Add a company/board by appending to a list; no skill edits required.
+  # ----------------------------------------------------------
+  discovery:
+    stop_after_tier_if_results_gte: null   # e.g. 25 to skip lower tiers once enough fresh matches exist
+    max_results_in_csv: 25
+    request_timeout_seconds: 20
+    max_parallel_requests: 10
+    on_tier_error: "log_and_continue"
+    location_filter: "locations.countries"
+    search_queries: []                     # e.g. "Backend Engineer", "Data Engineer"
+    title_include_regex: '(?i)(backend|back-end|software engineer|software developer|platform|data engineer)'
+    title_exclude_regex: '(?i)(frontend|front-end|mobile|android|ios|qa\b|test|intern\b|internship|trainee|manager|sales|recruit)'
+
+    order: [ats_apis, target_companies, eu_open_api, jobspy_mcp]
+
+    # TIER 1 - ATS JSON APIs (no auth, structured, most reliable)
+    ats_apis:
+      enabled: true
+      providers:
+        greenhouse:
+          list_url: "https://boards-api.greenhouse.io/v1/boards/{token}/jobs"
+          detail_url: "https://boards-api.greenhouse.io/v1/boards/{token}/jobs/{id}"
+          date_field: "first_published"
+          title_field: "title"
+          location_field: "location.name"
+          link_field: "absolute_url"
+        lever:
+          list_url: "https://api.lever.co/v0/postings/{token}?mode=json"
+          date_field: "createdAt"
+          title_field: "text"
+          location_field: "categories.location"
+          link_field: "hostedUrl"
+          description_field: "descriptionPlain"
+        ashby:
+          list_url: "https://api.ashbyhq.com/posting-api/job-board/{token}"
+          date_field: "publishedAt"
+          title_field: "title"
+          location_field: "location"
+          link_field: "jobUrl"
+          jobs_path: "jobs"
+        workday:
+          method: "POST"
+          list_url: "https://{tenant}.{wd}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs"
+          body: {appliedFacets: {}, limit: 20, offset: 0, searchText: "{query}"}
+          date_field: "postedOn"
+          title_field: "title"
+          location_field: "locationsText"
+          link_template: "https://{tenant}.{wd}.myworkdayjobs.com/en-US/{site}{externalPath}"
+        smartrecruiters:
+          list_url: "https://api.smartrecruiters.com/v1/companies/{token}/postings?limit=100&country={country}"
+          date_field: "releasedDate"
+          title_field: "name"
+        personio:
+          list_url: "https://{token}.jobs.personio.de/xml"
+          format: "xml"
+          date_field: "createdAt"
+          title_field: "name"
+          link_template: "https://{token}.jobs.personio.de/job/{id}"
+        workable:
+          list_url: "https://apply.workable.com/api/v1/widget/accounts/{token}"
+          date_field: "published_on"
+          title_field: "title"
+          link_field: "url"
+        recruitee:
+          list_url: "https://{token}.recruitee.com/api/offers/"
+          date_field: "published_at"
+          title_field: "title"
+          link_field: "careers_url"
+      # Board tokens. Unknown tokens simply return 404 and are skipped.
+      boards:
+        greenhouse: []          # e.g. [stripe, datadog]
+        lever: []               # e.g. [spotify]
+        ashby: []               # e.g. [notion]
+        workday: []             # e.g. - {name: Example, tenant: example, wd: wd1, site: ExampleSite}
+        smartrecruiters: []     # identifiers are case-sensitive
+        recruitee: []
+        workable: []
+        personio: []
+
+    # TIER 2 - Target companies (career pages)
+    # `ats: <provider>` uses the company's ATS API (token/tenant from tier 1 providers).
+    # `ats: custom` means no public JSON API: open `careers_url` with Playwright MCP.
+    target_companies:
+      enabled: true
+      companies: []             # e.g. - {name: Stripe, ats: greenhouse, token: stripe, careers_url: "https://stripe.com/jobs"}
+
+    # TIER 3 - EU open job APIs (free, no scraping)
+    eu_open_api:
+      enabled: true
+      sources:
+        - name: Arbeitnow
+          enabled: true
+          countries: [Germany]
+          url: "https://www.arbeitnow.com/api/job-board-api?page={page}"
+          max_pages: 5
+          jobs_path: "data"
+          date_field: "created_at"
+          title_field: "title"
+          company_field: "company_name"
+          location_field: "location"
+          link_field: "url"
+          description_field: "description"
+          visa_sponsorship_field: "visa_sponsorship"
+        - name: Adzuna
+          enabled: false                     # needs a free key: set ADZUNA_APP_ID / ADZUNA_APP_KEY in env
+          countries: {Germany: de, Netherlands: nl, Poland: pl, Belgium: be, Ireland: ie, United Kingdom: gb}
+          url: "https://api.adzuna.com/v1/api/jobs/{country_code}/search/1?app_id={ADZUNA_APP_ID}&app_key={ADZUNA_APP_KEY}&what={query}&max_days_old=1&results_per_page=50&sort_by=date"
+          jobs_path: "results"
+          date_field: "created"
+          title_field: "title"
+          company_field: "company.display_name"
+          location_field: "location.display_name"
+          link_field: "redirect_url"
+        - name: JustJoinIT
+          enabled: true
+          countries: [Poland]
+          url: "https://justjoin.it/api/candidate-api/offers"
+          headers: {"Version": "2"}
+          jobs_path: "data"
+          max_pages: 1
+          date_field: "publishedAt"
+          title_field: "title"
+          company_field: "companyName"
+          location_field: "city"
+          link_template: "https://justjoin.it/job-offer/{slug}"
+
+    # TIER 4 - Local JobSpy MCP (python-jobspy) + extra boards
+    jobspy_mcp:
+      enabled: true
+      server: "jobspy"
+      tool: "scrape_free_job_boards"
+      sites: [linkedin, indeed, glassdoor, google]
+      hours_old: 24
+      results_wanted_per_query: 25
+      countries_indeed: []      # e.g. [Germany, Netherlands]; Indeed/Glassdoor default to USA without it
+      locations: []             # one call per query x location, e.g. "Berlin, Germany"
+      max_calls_per_run: 30
+      on_error: "fall_back_to_apify"
+      apify_fallback:
+        actor: "cheap_scraper/linkedin-job-scraper"
+        input: {publishedAt: "r86400", experienceLevel: ["associate", "mid-senior"], maxItems: 150, saveOnlyUniqueItems: true}
+        max_total_charge_usd: 1
+      extra_boards: []          # e.g. - {name: Xing, url: "https://www.xing.com/jobs/search?keywords={query}&location={location}&sort=date"}
+
+  # ----------------------------------------------------------
+  # OUTPUT / DEDUPE (used by job-search-phase)
+  # ----------------------------------------------------------
+  output:
+    csv_path_template: "output/daily_jobs_{date}_{time}.csv"
+    date_format: "%Y-%m-%d"
+    time_format: "%H%M%S"
+    columns: ["Job Title", "Company", "Location", "Date Posted", "Match Score", "Ranking", "Source", "Job Link"]
+    dedupe_against:
+      - path: "output/applied_jobs.csv"
+        match_on: "url_or_company_and_title"
+    dedupe_within_run: "company+normalized_title+location"
+    normalize_url: "strip_query_and_tracking_params"
+
+# ============================================================
+# SKILLS
+# ============================================================
+
+skills:
+  must_have: []
+  core_backend: []
+  core_data_cloud: []
+  databases_storage: []
+  testing_quality: []
+  cloud_native_devops: []
+  genai_llm: []
+  secondary: []
+  frontend_mobile: []
+  aliases: {}                   # e.g. "Kubernetes": ["K8s"]
+
+# ============================================================
+# TARGET LOCATIONS
+# ============================================================
+
+locations:
+  countries:
+    ExampleCountry:
+      enabled: false
+      aliases: []               # e.g. ["Germany", "Deutschland", "DE"]
+      regions: []               # e.g. ["Berlin", "Munich"]
+
+  work_mode:
+    remote: false
+    hybrid: true
+    onsite: true
+
+  relocation:
+    willing_to_relocate: true
+
+# ============================================================
+# WORK AUTHORIZATION
+# ============================================================
+
+work_authorization:
+  current_country: ""
+  needs_sponsorship: false
+
+  preferred:
+    - "Visa sponsorship"
+    - "Work permit sponsorship"
+    - "Relocation support"
+
+  sponsorship_matching:
+    explicit_sponsorship: "high_priority"
+    unclear_sponsorship: "do_not_auto_reject"
+    no_sponsorship: "strong_penalty"
+
+# ============================================================
+# JOB MATCHING
+# ============================================================
+
+matching:
+  minimum_score: 70
+
+  priority_thresholds:
+    high: 90
+    medium: 80
+    low: 70
+
+  weights:                      # should sum to 100
+    technical_skills: 40
+    experience: 15
+    role_title: 15
+    location: 10
+    sponsorship: 15
+    other: 5
+
+  skill_group_weights:          # keys must match groups under `skills`
+    core_backend: 1.00
+    core_data_cloud: 0.95
+    databases_storage: 0.85
+    cloud_native_devops: 0.80
+    testing_quality: 0.70
+    genai_llm: 0.65
+    secondary: 0.45
+    frontend_mobile: 0.15
+
+  strong_match_signals: []
+  negative_match_signals: []    # e.g. "Frontend-only", "Mobile-only"
+
+# ============================================================
+# PEOPLE DISCOVERY
+# ============================================================
+
+people_discovery:
+  target_count: 5
+  max_count: 6
+  enrichment_provider: "apollo_mcp"
+  manual_fallback: true
+
+  target_titles:
+    - "Principal Engineer"
+    - "Principal Software Engineer"
+    - "Staff Software Engineer"
+    - "Senior Software Engineer"
+
+  exclude_titles:
+    - "Engineering Manager"
+    - "Manager"
+    - "Director"
+    - "Recruiter"
+    - "Talent Acquisition"
+    - "HR"
+    - "Human Resources"
+    - "Sales"
+
+  priority_hierarchy:
+    1: "Principal Engineer"
+    2: "Staff Software Engineer"
+    3: "Senior Software Engineer"
+
+# ============================================================
+# OUTREACH
+# ============================================================
+
+outreach:
+  language: "English"
+
+  max_email_words: 200
+  max_linkedin_words: 80
+
+  email_signature: |
+    Best regards,
+    <Your Name>
+    <Your Title>
+    <email> | <phone>
+    <linkedin> | <github>
+
+  style:
+    professional: true
+    concise: true
+    confident: true
+    friendly: true
+    direct: true
+    natural: true
+
+  include:
+    job_title: true
+    company_name: true
+    relevant_skills: true
+    contact_role: true
+    one_specific_alignment_point: true
+    relevant_project_or_impact: true
+
+  avoid:
+    generic_opening: true
+    excessive_flattery: true
+    resume_dump: true
+    long_paragraphs: true
+    exaggerated_claims: true
+
+  avoid_phrases:
+    - "Hope you're doing well"
+    - "I am reaching out to express my interest"
+    - "dream company"
+    - "passionate about"
+    - "I would be extremely grateful"
+    - "I was thrilled to come across"
+    - "I believe I would be a perfect fit"
+    - "I saw your talk"
+    - "I read your post"
+
+  referral_request:
+    direct: true
+    polite: true
+    ask_for_referral_if_employee: true
+
+  # LinkedIn messages end with this (email uses email_signature above)
+  linkedin_signature: |
+    Best,
+    <First Name>
+
+  personalization:
+    allow_contact_title_and_company: true
+    allow_personal_references: false
+
+  message_template: |
+    Hi {first_name},
+
+    I saw the {job_title} opening at {company} in {city}. I am a <Your Title> with {years} years of experience {experience_summary}.
+
+    Given your {contact_title} at {company}, could you consider referring me for this role? I am ready to relocate to {city}.
+
+    Job Link: {job_url}
+  email_subject_template: "Referral request: {job_title}, {company}"
+
+  # Run BEFORE contact discovery. Reads the job posting text.
+  sponsorship_check:
+    enabled: true
+    on_explicit_no: "stop_and_tell_user"
+    on_explicit_yes: "continue"
+    on_not_mentioned: "continue"
+    on_conflicting_signals: "stop_and_ask_user"
+    no_patterns:
+      - '(?i)\bno\s+(visa\s+)?(sponsorship|relocation)'
+      - '(?i)(do|does|will)\s+not\s+(offer|provide|support)\s+(visa|sponsorship|relocation|work permit)'
+      - '(?i)(unable|not able|cannot|can.t|won.t)\s+(to\s+)?sponsor'
+      - '(?i)without\s+(the\s+need\s+for\s+)?(visa\s+)?sponsorship'
+      - '(?i)(visa|sponsorship|relocation)(\s+(support|assistance|package|sponsorship))?\s+(is|are)\s+not\s+(available|provided|offered|included)'
+      - '(?i)(must|need to|required to)\s+(already\s+)?(have|hold)\s+(the\s+)?(legal\s+)?right\s+to\s+work'
+      - '(?i)local\s+candidates\s+only'
+      - '(?i)(must|need to|required to|have to)\s+(be\s+)?(eligible|authori[sz]ed|entitled|permitted)\s+to\s+(live\s+and\s+)?work\s+in'
+      - '(?i)not\s+(eligible|available)\s+for\s+(visa|relocation|sponsorship)'
+    yes_patterns:
+      - '(?i)visa\s+sponsorship\s+(is\s+)?(available|provided|offered|possible)'
+      - '(?i)(we|company)\s+(will|can|do|does)\s+(offer\s+)?sponsor'
+      - '(?i)(offer|provide)s?\s+(visa|relocation)'
+      - '(?i)work\s+permit\s+(support|assistance|sponsorship)'
+
+# ============================================================
+# EMAIL / GMAIL
+# ============================================================
+
+email:
+  provider: "gmail"
+  from_name: ""
+
+  max_emails_per_job: 1
+  max_emails_per_company: 1
+
+  auto_send: true
+  require_approval: true
+
+# ============================================================
+# LINKEDIN
+# ============================================================
+
+linkedin:
+  enabled: true
+  generate_message: true
+
+  auto_send: false
+  require_manual_send: true
+
+# ============================================================
+# SAFETY / QUALITY
+# ============================================================
+
+safety:
+  minimum_contact_confidence: 0.85
+  minimum_company_match: 0.80
+
+  never_guess_email: true
+  skip_personal_email: true
+
+  skip_generic_email:
+    - "info@"
+    - "support@"
+    - "admin@"
+    - "contact@"
+    - "hello@"
+
+  duplicate_contact_check: true
+  maximum_outreach_per_company: 2
+  require_business_email: true
+
+# ============================================================
+# SYSTEM
+# ============================================================
+
+system:
+  timezone: ""                  # IANA name, e.g. "Europe/Berlin"
+
+  dry_run: true
+
+  logging:
+    level: "INFO"
+
+  retry:
+    max_attempts: 3
+    backoff_seconds: 2
+
+  local_paths:
+    input_folder: "input"
+    output_folder: "output"
+    resumes: "input/resumes"

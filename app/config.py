@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 
 class Config:
-    def __init__(self, path: str = "config.yaml"):
+    def __init__(self, path: str = "profile.yaml"):
         load_dotenv()
         self.path = Path(path)
         with self.path.open("r", encoding="utf-8") as f:

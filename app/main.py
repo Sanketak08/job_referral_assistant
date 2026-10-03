@@ -133,7 +133,7 @@ def fetch_job_with_fallback(
 def main(job_url: str):
     logging.basicConfig(level=logging.INFO)
 
-    config = Config("config.yaml")
+    config = Config("profile.yaml")
 
     candidate = config.section("candidate", default={})
     matching = config.section("matching", default={})
