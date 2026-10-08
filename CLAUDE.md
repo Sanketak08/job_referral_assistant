@@ -12,7 +12,7 @@ An agent-driven daily job-hunt workflow run entirely through Claude Code skills 
 - `.claude/settings.json` — shared permissions (everything allowed, `bypassPermissions`). `.claude/settings.local.json` — gitignored, holds the MCP secrets as `env` values.
 - `.mcp.json` — MCP servers: `playwright`, `apify`, `apollo-io`, `tavily`, `gmail`. Secrets are `${VAR}` references filled from `settings.local.json`.
 - `.agents/gmail_mcp.py` — custom Gmail SMTP MCP server (tool `send_email_with_attachment(to_email, subject, body, attachment_path)`, uses `GMAIL_ADDRESS` / `GMAIL_APP_PASSWORD`). Needs the `mcp` Python package.
-- `input/profile.yaml` — candidate source of truth (titles, exclusions, tech stack, answers to form fields, `email_signature`). `input/resumes/` holds the PDFs (`Sanket_Backend_Engineer_EU.pdf`, `Sanket_Resume_Data_Engineer_EU.pdf`).
+- `input/profile.yaml` — candidate source of truth (titles, exclusions, tech stack, answers to form fields, `email_signature`). `input/resumes/` holds the PDFs (`Sanket_Backend_Engineer_EU.pdf`, `Sanket_Data_Engineer_EU.pdf`, `Sanket_Agentic_AI_Engineer_EU.pdf`).
 - `output/` — `daily_jobs_[DATE]_[TIME].csv`, `applied_jobs.csv` (`Company, Job Title, Job Link, Timestamp`), `contacted_people.csv`.
 - `scratch/` — one-off Playwright scripts; root PNGs and `hyra_job.html` are throwaway artifacts.
 

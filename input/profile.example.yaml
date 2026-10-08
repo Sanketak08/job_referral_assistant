@@ -22,6 +22,9 @@ candidate:
     distributed_systems_years: 0
     data_engineering_years: 0
 
+  employment_history:           # newest first; end: "present" for the current job
+    - {company: "", title: "", location: "", start: "YYYY-MM", end: "present"}
+
   salary:
     expectation: ""             # e.g. "60,000 EUR"
 
@@ -45,7 +48,11 @@ candidate:
     cgpa: ""
 
   resume:
-    path: ""                    # absolute path to your resume PDF, e.g. "C:\\Users\\you\\resume.pdf"
+    path: ""                    # default resume, e.g. "input/resumes/Your_Name_Backend.pdf"
+    variants:                   # optional: pick a resume by job type
+      backend: ""
+      data_engineer: ""
+      agentic_ai: ""
 
   profile_summary: >
     Two or three sentences summarising your experience, main stack and strengths.
@@ -98,7 +105,7 @@ candidate:
 job_search:
   target_titles:
     primary: []                 # e.g. "Backend Engineer", "Software Engineer"
-    secondary: []               # e.g. "Data Engineer", "Platform Engineer"
+    secondary: []               # e.g. "Data Engineer", "AI Engineer"
 
   exclude_titles: []            # e.g. "Frontend Engineer", "QA Engineer"
 
@@ -310,14 +317,15 @@ job_search:
 
 skills:
   must_have: []
+  languages: []
   core_backend: []
   core_data_cloud: []
   databases_storage: []
   testing_quality: []
   cloud_native_devops: []
   genai_llm: []
+  ai_assisted_development: []
   secondary: []
-  frontend_mobile: []
   aliases: {}                   # e.g. "Kubernetes": ["K8s"]
 
 # ============================================================
@@ -379,13 +387,14 @@ matching:
 
   skill_group_weights:          # keys must match groups under `skills`
     core_backend: 1.00
+    languages: 0.95
     core_data_cloud: 0.95
     databases_storage: 0.85
     cloud_native_devops: 0.80
     testing_quality: 0.70
     genai_llm: 0.65
+    ai_assisted_development: 0.40
     secondary: 0.45
-    frontend_mobile: 0.15
 
   strong_match_signals: []
   negative_match_signals: []    # e.g. "Frontend-only", "Mobile-only"
