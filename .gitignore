@@ -22,3 +22,5 @@ input/*
 input/resumes/*
 !input/resumes/.gitkeep
 scratch/
+
+meta.yml

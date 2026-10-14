@@ -14,7 +14,7 @@ import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlsplit
 
-ROOT = r'D:\Sanket\job_referral_assistant'
+ROOT = str(__import__("pathlib").Path(__file__).resolve().parents[4])
 SNAP = os.path.join(ROOT, 'output', 'company_job_snapshot.json')
 P = yaml.safe_load(open(os.path.join(ROOT, 'input', 'profile.yaml'), encoding='utf-8'))
 D = P['job_search']['discovery']
@@ -63,7 +63,8 @@ log = []
 
 
 def get(url, **kw):
-    return requests.get(url, headers=H, timeout=T, **kw)
+    h = {**H, **kw.pop("headers", {})}
+    return requests.get(url, headers=h, timeout=T, **kw)
 
 
 def do(prov, tok):

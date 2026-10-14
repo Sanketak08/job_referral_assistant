@@ -3,35 +3,57 @@
     "playwright": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest"]
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
     },
     "apify": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@apify/actors-mcp-server"],
-      "env": { "APIFY_TOKEN": "${APIFY_TOKEN}" }
+      "args": [
+        "-y",
+        "@apify/actors-mcp-server"
+      ],
+      "env": {
+        "APIFY_TOKEN": "${APIFY_TOKEN}"
+      }
     },
     "apollo-io": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@thevgergroup/apollo-io-mcp@latest"],
-      "env": { "APOLLO_API_KEY": "${APOLLO_API_KEY}" }
+      "args": [
+        "-y",
+        "@thevgergroup/apollo-io-mcp@latest"
+      ],
+      "env": {
+        "APOLLO_API_KEY": "${APOLLO_API_KEY}"
+      }
     },
     "tavily": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "tavily-mcp@latest"],
-      "env": { "TAVILY_API_KEY": "${TAVILY_API_KEY}" }
+      "args": [
+        "-y",
+        "tavily-mcp@latest"
+      ],
+      "env": {
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+      }
     },
     "jobspy": {
       "type": "stdio",
-      "command": "D:\\Sanket\\job_referral_assistant\\.venv\\Scripts\\python.exe",
-      "args": ["D:\\Sanket\\job_referral_assistant\\.agents\\jobspy_mcp.py"]
+      "command": ".venv/bin/python",
+      "args": [
+        ".agents/jobspy_mcp.py"
+      ]
     },
     "gmail": {
       "type": "stdio",
-      "command": "python",
-      "args": ["D:\\Sanket\\job_referral_assistant\\.agents\\gmail_mcp.py"],
+      "command": ".venv/bin/python",
+      "args": [
+        ".agents/gmail_mcp.py"
+      ],
       "env": {
         "GMAIL_ADDRESS": "${GMAIL_ADDRESS}",
         "GMAIL_APP_PASSWORD": "${GMAIL_APP_PASSWORD}"

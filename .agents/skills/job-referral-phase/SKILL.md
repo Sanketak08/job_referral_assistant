@@ -21,5 +21,5 @@ description: Discovers a guaranteed 5-6 contacts per company, handles manual ema
 4. **Review & Dispatch**: 
    - Present the drafted emails to the user for final approval.
    - Upon approval, call the Gmail MCP tool to dispatch the emails. 
-   - **Attachment Rule:** You must use the attachment parameter in the Gmail MCP to encode and attach the physical file located at `D:\Sanket\job_referral_assistant\input\resumes\`. Do not insert a Google Drive link.
-5. **Log**: Append the contacted email addresses, company, and timestamps to `D:\Sanket\job_referral_assistant\output\contacted_people.csv`.
+   - **Attachment Rule:** You must use the attachment parameter in the Gmail MCP to encode and attach the physical file located at `input/resumes/`. Do not insert a Google Drive link.
+5. **Log**: Append the contacted email addresses, company, and timestamps to `output/contacted_people.csv`.

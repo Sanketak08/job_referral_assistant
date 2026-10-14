@@ -4,15 +4,15 @@ description: Discovers jobs strictly posted in the last 24 hours across tiered s
 ---
 # Job Search Phase
 
-All sources, companies, filters, weights and paths come from `D:\Sanket\job_referral_assistant\input\profile.yaml` (`job_search`, `skills`, `locations`, `work_authorization`, `matching`). Never hardcode them here. If a value is missing in the profile, use the default noted in the step; do not invent data.
+All sources, companies, filters, weights and paths come from `input/profile.yaml` (`job_search`, `skills`, `locations`, `work_authorization`, `matching`). Never hardcode them here. If a value is missing in the profile, use the default noted in the step; do not invent data.
 
 ## Steps
 1. **Load Profile & Initialize**:
    - Read `profile.yaml`. Extract `job_search.target_titles`, `exclude_titles`, `seniority`, `experience`, `freshness`, `discovery`, `skills`, `locations`, `work_authorization`, `matching`, `output`.
-   - Read every file in `job_search.output.dedupe_against` (default `D:\Sanket\job_referral_assistant\output\applied_jobs.csv`, no header, column 1 = job URL) and build a set of normalized applied URLs (drop query string and tracking params, lowercase host).
+   - Read every file in `job_search.output.dedupe_against` (default `output/applied_jobs.csv`, no header, column 1 = job URL) and build a set of normalized applied URLs (drop query string and tracking params, lowercase host).
    - Get the current time once (`date`), in `system.timezone`. It is the reference for every age calculation and for the output filename.
 2. **Prioritized Discovery** (run tiers in the order of `job_search.discovery.order`; skip tiers with `enabled: false`; stop early only if `stop_after_tier_if_results_gte` is set and reached):
-   - **Tier 1 - `ats_apis`:** For every token in `ats_apis.boards`, call the provider's `list_url` (template in `ats_apis.providers`). Run requests in parallel (`max_parallel_requests`, timeout `request_timeout_seconds`) with a short script (`.venv\Scripts\python.exe`, `requests`). A 404/timeout for one board is logged and skipped, never fatal.
+   - **Tier 1 - `ats_apis`:** For every token in `ats_apis.boards`, call the provider's `list_url` (template in `ats_apis.providers`). Run requests in parallel (`max_parallel_requests`, timeout `request_timeout_seconds`) with a short script (`.venv/bin/python`, `requests`). A 404/timeout for one board is logged and skipped, never fatal.
    - **Tier 2 - `target_companies`:** For each company with an `ats` other than `custom`, use that provider with the company's token/tenant (skip if already fetched in Tier 1). For `ats: custom`, open `careers_url` with Playwright MCP (`browser_navigate`, `browser_snapshot`) or `apify--rag-web-browser`, read the listed roles, and open each candidate job page to get its posting date. Limit custom-page work to titles passing `job_search.discovery.title_include_regex`.
    - **Tier 3 - `eu_open_api`:** For each enabled source, call `url` (fill `{page}`, `{query}`, `{country_code}` from `discovery.search_queries` and `countries`; add `headers`; read env vars named in the URL, skip the source if one is unset). Map fields with the source's `*_field` keys.
    - **Tier 4 - `jobspy_mcp`:** Call MCP tool `scrape_free_job_boards` once per (query x location) up to `max_calls_per_run`, with `sites`, `hours_old`, `results_wanted`, and `country_indeed` derived from the location's country. Then fetch each `extra_boards` entry (Xing, StepStone, etc.) via `apify--rag-web-browser` or Playwright, keeping only postings from the last 24h. If the tool errors or the server is down, follow `on_error` (Apify actor in `apify_fallback`, with `maxTotalChargeUsd` cap). Label `Source` with the real board name.
@@ -24,7 +24,7 @@ All sources, companies, filters, weights and paths come from `D:\Sanket\job_refe
 4. **Scoring**: Score each remaining job 0-100 against the profile using `matching.weights` (technical_skills, experience, role_title, location, sponsorship, other) and `matching.skill_group_weights`. Skills are matched via `skills.aliases`; `skills.must_have` missing -> heavy penalty; `matching.strong_match_signals` add; `negative_match_signals` subtract; sponsorship follows `work_authorization.sponsorship_matching` (explicit = high priority, unclear = never reject, ruled out = strong penalty). Drop jobs below `matching.minimum_score`. Rank descending, keep the top `job_search.discovery.max_results_in_csv`.
 5. **Dynamic Output Generation**:
    - Generate the current date and time using `job_search.output.date_format` and `output.time_format` (`YYYY-MM-DD_HHMMSS`).
-   - Write the top results to `job_search.output.csv_path_template` (`D:\Sanket\job_referral_assistant\output\daily_jobs_[DATE]_[TIME].csv`) with a script using the `csv` module (proper quoting, UTF-8).
+   - Write the top results to `job_search.output.csv_path_template` (`output/daily_jobs_[DATE]_[TIME].csv`) with a script using the `csv` module (proper quoting, UTF-8).
    - The CSV must strictly contain these columns: `Job Title, Company, Date Posted, Match Score, Ranking, Source, Job Link`. Date Posted is `YYYY-MM-DD`. Job Link is the direct posting URL without tracking params.
    - Re-read the file to confirm it exists and has the header plus at least one row. If zero jobs passed, still write the file with only the header.
 6. **Token Constraint**: Output only the file path upon completion. Do not generate conversational text or rationales.

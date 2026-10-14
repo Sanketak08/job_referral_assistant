@@ -75,19 +75,64 @@ Two tools (`jobspy` for job boards, `gmail` for sending email) are small Python 
 
 ```
 python -m venv .venv
-.venv\Scripts\pip install mcp python-jobspy pandas
+.venv/bin/pip install "mcp<2" python-jobspy pandas
 ```
 
-(On Mac/Linux, use `.venv/bin/pip` instead.)
+(On Windows, use `.venv\Scripts\pip` instead, and in `.mcp.json` change `.venv/bin/python` to `.venv\\Scripts\\python.exe`.)
 
-Then open the file `.mcp.json` and check the two places that mention `D:\\Sanket\\job_referral_assistant\\...`. **Change that to the folder where you put this project on your computer.**
+The paths in `.mcp.json` are relative to the project folder, so no other editing is needed.
+
+### Step 6: Check that every required file is present (do this before first use)
+
+Claude Code only works if all the files below exist. Some are **not downloaded from GitHub** because they are private (listed in `.gitignore`), so a fresh copy of the project will be missing them and you must create them yourself. A missing file usually fails quietly (for example, the Gmail tool never starts, or the skills cannot find your profile), so check this list before running anything.
+
+**A. Private files: NOT in git, you must create or copy these yourself**
+
+| File / folder | Why it is needed | How to create it |
+|---|---|---|
+| `.claude/settings.local.json` | Holds your API keys and Gmail login. Without it the `gmail`, `tavily`, `apify` and `apollo-io` tools cannot start. **Easy to forget.** | Copy `.claude/settings.local.example.json` to `.claude/settings.local.json` and fill in the values (Step 4). |
+| `input/profile.yaml` | Your details. Every skill reads it. | Copy `input/profile.example.yaml` (Step 2). |
+| `input/resumes/*.pdf` | The resumes attached to applications and emails. File names must match `profile.yaml` and the skills (for example `Sanket_Backend_Engineer_EU.pdf`). | Put your PDFs here (Step 3). |
+| `.venv/` | The Python environment used by the `jobspy` and `gmail` tools (`.mcp.json` points to `.venv/bin/python`). | Run the commands in Step 5. |
+| `output/` | Job lists and the applied/contacted logs. The skills create the files, but the folder must exist. | `mkdir -p output` if it is missing. |
+| `.agents/mcp_config.json` and `.agents/credentials.json` | Only for Antigravity CLI (section 7). Not needed for Claude Code. | Skip unless you use Antigravity. |
+
+**B. Files that ARE in git: you do not create them, but confirm they are there and unedited**
+
+| File | What breaks if it is missing |
+|---|---|
+| `CLAUDE.md` | Claude does not learn the project rules (approval gates, which folders matter). |
+| `.mcp.json` | None of the tools (browser, search, Gmail, job boards) are available. |
+| `.claude/settings.json` | Claude asks permission for every step instead of running the workflow. |
+| `.claude/skills/daily-pipeline/SKILL.md` | "run daily pipeline" does nothing useful. |
+| `.claude/skills/job-search-phase/SKILL.md` and `scripts/fetch_ats.py` | Job search cannot run, or cannot read the company job boards. |
+| `.claude/skills/job-application-phase/SKILL.md` | Application filling falls back to guessing and loses the safety rules. |
+| `.claude/skills/job-referral-phase/SKILL.md` | Referral contacts and emails cannot be produced. |
+| `.agents/gmail_mcp.py` and `.agents/jobspy_mcp.py` | The `gmail` and `jobspy` tools cannot start. |
+| `input/profile.example.yaml` | You have no template to build your profile from. |
+
+**Quick check.** From the project folder, run this. Every line should say `OK`; anything saying `MISSING` must be fixed first:
+
+```
+for f in CLAUDE.md .mcp.json .claude/settings.json .claude/settings.local.json \
+  .claude/skills/daily-pipeline/SKILL.md .claude/skills/job-search-phase/SKILL.md \
+  .claude/skills/job-search-phase/scripts/fetch_ats.py \
+  .claude/skills/job-application-phase/SKILL.md .claude/skills/job-referral-phase/SKILL.md \
+  .agents/gmail_mcp.py .agents/jobspy_mcp.py input/profile.yaml .venv/bin/python; do
+  [ -e "$f" ] && echo "OK       $f" || echo "MISSING  $f"
+done
+ls input/resumes/*.pdf >/dev/null 2>&1 && echo "OK       input/resumes/*.pdf" || echo "MISSING  input/resumes/*.pdf"
+[ -d output ] && echo "OK       output/" || echo "MISSING  output/ (run: mkdir -p output)"
+```
+
+Also open `.claude/settings.local.json` and confirm none of the five values is empty. After editing it, **restart Claude Code**; keys are only read at startup.
 
 ---
 
 ## 3. How to use it with Claude Code
 
 1. Open a terminal (Command Prompt, PowerShell, or Terminal).
-2. Go into this project's folder, for example: `cd D:\Sanket\job_referral_assistant`
+2. Go into this project's folder, for example: `cd path/to/job_referral_assistant`
 3. Type `claude` and press Enter. Claude Code starts and automatically learns the project and its skills.
 4. Type what you want in plain English. Examples:
 
@@ -198,7 +243,7 @@ To set it up:
 
 1. Install Antigravity CLI by following Google's official instructions, and sign in.
 2. Complete the **One-time setup** in section 2 above (profile, resume, Python tools).
-3. Open `.agents/mcp_config.json` and paste your keys into the matching `env` lines (Antigravity does not read `settings.local.json`). Fix the `D:\\Sanket\\...` folder paths to your own. This file is on the "do not upload" list, so your keys stay private.
+3. Open `.agents/mcp_config.json` and paste your keys into the matching `env` lines (Antigravity does not read `settings.local.json`). Check that the script paths there point to this project folder. This file is on the "do not upload" list, so your keys stay private.
 4. Open a terminal in the project folder, start Antigravity CLI, and give it the same plain-English commands, such as `run daily pipeline`.
 
 Keep in mind: the main, up-to-date copy of the skills is in **`.claude/skills/`**. The copy in `.agents/skills/` is older. If you change a skill, change it in `.claude/skills/` and copy the file across to `.agents/skills/` so both stay the same.

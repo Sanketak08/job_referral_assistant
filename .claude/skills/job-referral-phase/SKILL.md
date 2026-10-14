@@ -4,7 +4,7 @@ description: Checks the job posting for visa/relocation restrictions first, then
 ---
 # Job Referral Phase
 
-All wording, signatures and patterns come from `D:\Sanket\job_referral_assistant\input\profile.yaml` (`outreach`, `candidate`, `skills`, `locations`, `work_authorization`). Do not hardcode them here.
+All wording, signatures and patterns come from `input/profile.yaml` (`outreach`, `candidate`, `skills`, `locations`, `work_authorization`). Do not hardcode them here.
 
 ## Steps
 0. **Sponsorship / Relocation Check (run first, before any contact search)**:
@@ -36,5 +36,5 @@ All wording, signatures and patterns come from `D:\Sanket\job_referral_assistant
 4. **Review & Dispatch**:
    - Present the drafted emails and LinkedIn messages to the user for approval. Show the shared body once with the per-person differences (first name and contact title) so the review stays short.
    - Upon approval, call the Gmail MCP tool to send each email.
-   - **Attachment Rule:** use the attachment parameter to attach the physical resume from `D:\Sanket\job_referral_assistant\input\resumes\` (default `Sanket_Backend_Engineer_EU.pdf`). Do not insert a Google Drive link.
-5. **Log**: Append the contacted email addresses, company and timestamps to `D:\Sanket\job_referral_assistant\output\contacted_people.csv` (columns `email,company,timestamp`).
+   - **Attachment Rule:** use the attachment parameter to attach the physical resume from `input/resumes/` (default `Sanket_Backend_Engineer_EU.pdf`). Do not insert a Google Drive link.
+5. **Log**: Append the contacted email addresses, company and timestamps to `output/contacted_people.csv` (columns `email,company,timestamp`).
