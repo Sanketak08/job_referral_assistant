@@ -12,7 +12,7 @@ A board whose fetch failed or returned 0 jobs never overwrites its snapshot.
 import yaml, requests, re, json, datetime as dt, html, sys, os
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, parse_qsl
 
 ROOT = str(__import__("pathlib").Path(__file__).resolve().parents[4])
 SNAP = os.path.join(ROOT, 'output', 'company_job_snapshot.json')
@@ -31,9 +31,13 @@ def strip(s):
     return re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', s or ''))).strip()
 
 
+ID_PARAMS = ('gh_jid', 'jobid', 'job_id', 'jid', 'jk', 'id')  # some career sites keep the job id only in the query
+
+
 def norm(u):
     s = urlsplit(u or '')
-    return (s.netloc.lower() + s.path).rstrip('/')
+    ids = sorted(f'{k}={v}' for k, v in parse_qsl(s.query) if k.lower() in ID_PARAMS)
+    return (s.netloc.lower() + s.path).rstrip('/') + ('?' + '&'.join(ids) if ids else '')
 
 
 def pdt(v):
@@ -51,13 +55,21 @@ def pdt(v):
 
 
 boards = {}
+JSONCFG = {}  # ats: json target companies, keyed by token
 for src in (D['ats_apis']['boards'], D['ats_apis']['boards_verified']):
     for prov, toks in src.items():
-        if prov != 'workday':
+        if prov == 'workday':  # entries are dicts; token becomes tenant/wd/site
+            boards.setdefault(prov, set()).update(f"{w['tenant']}/{w['wd']}/{w['site']}" for w in toks or [])
+        else:
             boards.setdefault(prov, set()).update(toks)
 for c in D['target_companies']['companies']:
     if c['ats'] in ('greenhouse', 'lever', 'ashby', 'smartrecruiters', 'workable', 'recruitee', 'personio'):
         boards.setdefault(c['ats'], set()).add(c['token'])
+    elif c['ats'] == 'workday':
+        boards.setdefault('workday', set()).add(f"{c['tenant']}/{c['wd']}/{c['site']}")
+    elif c['ats'] == 'json':
+        boards.setdefault('json', set()).add(c['token'])
+        JSONCFG[c['token']] = c
 
 log = []
 
@@ -112,12 +124,37 @@ def do(prov, tok):
                 g = lambda k: (p.findtext(k) or '')
                 out.append(dict(title=g('name'), loc=g('office'), date=pdt(g('createdAt')), link=f"https://{tok}.jobs.personio.de/job/{g('id')}",
                                 desc=' '.join(strip(x.findtext('value')) for x in p.iter('jobDescription'))))
+        elif prov == 'workday':  # CXS API; postedOn is only "Posted 3 Days Ago", so newness comes from the snapshot
+            tenant, wd, site = tok.split('/')
+            base = f'https://{tenant}.{wd}.myworkdayjobs.com'
+            off, total = 0, 1
+            while off < min(total, 2000):
+                r = requests.post(f'{base}/wday/cxs/{tenant}/{site}/jobs', json={'appliedFacets': {}, 'limit': 20, 'offset': off, 'searchText': ''},
+                                  headers={**H, 'Accept': 'application/json'}, timeout=T); r.raise_for_status()
+                js = r.json()
+                if off == 0:  # Workday only reports the total on the first page
+                    total = js.get('total', 0)
+                for j in js.get('jobPostings', []):
+                    posted = (j.get('postedOn') or '').lower()
+                    days = 0 if 'today' in posted else 1 if 'yesterday' in posted else int(m.group(1)) if (m := re.search(r'(\d+)\+? days', posted)) else None
+                    out.append(dict(title=j['title'], loc=j.get('locationsText', ''), link=f"{base}/en-US/{site}{j['externalPath']}", desc='',
+                                    date=None if days is None else now - dt.timedelta(days=days, hours=12)))
+                if not js.get('jobPostings'):
+                    break
+                off += 20
+        elif prov == 'json':  # a company's own careers JSON (fields mapped in the profile)
+            c = JSONCFG[tok]
+            r = get(c['api_url']); r.raise_for_status()
+            pick = lambda j, path: __import__('functools').reduce(lambda a, k: (a or {}).get(k), path.split('.'), j)
+            for j in pick(r.json(), c['jobs_path']):
+                out.append(dict(title=pick(j, c['title_field']), loc=pick(j, c['location_field']) or '', date=pdt(pick(j, c['date_field'])) if c.get('date_field') else None,
+                                link=c['link_template'].format(**j), desc=''))
     except Exception as e:
         log.append(f'{prov}:{tok} {type(e).__name__}')
         return prov, tok, None
     for o in out:
-        o['company'] = tok
-        o['source'] = prov.capitalize()
+        o['company'] = JSONCFG[tok]['name'] if prov == 'json' else tok.split('/')[0]
+        o['source'] = 'Careers site' if prov == 'json' else prov.capitalize()
     return prov, tok, out
 
 
@@ -143,7 +180,7 @@ jobs = []
 for key, out in results.items():
     prev = comp.get(key)
     cur = {norm(o['link']): o for o in out if o.get('link')}
-    flagged = {}
+    flagged, anomaly = {}, False
     if prev is None:
         baseline.append(key)
     else:
@@ -151,6 +188,7 @@ for key, out in results.items():
         new_urls = [u for u in cur if u not in pj]
         if len(out) and len(new_urls) > max(30, 0.5 * len(out)):
             anomalies.append(f'{key}: {len(new_urls)}/{len(out)} new, ignoring (id scheme change?)')
+            anomaly = True
         else:
             for u in new_urls:
                 flagged[u] = nowiso
@@ -166,9 +204,9 @@ for key, out in results.items():
     # new snapshot entry (only for boards that returned jobs)
     if out:
         old = prev['jobs'] if prev else {}
-        # first_seen stays None for jobs already present at baseline (age unknown, never "new" by window)
+        # first_seen stays None for jobs present at baseline or in an ignored anomaly burst (age unknown, never "new" by window)
         comp[key] = {'last_scan': nowiso, 'jobs': {u: {'title': o['title'], 'loc': o['loc'].strip(),
-                     'first_seen': old[u].get('first_seen') if u in old else (nowiso if prev is not None else None)} for u, o in cur.items()}}
+                     'first_seen': old[u].get('first_seen') if u in old else (nowiso if prev is not None and not anomaly else None)} for u, o in cur.items()}}
 
 # ---- Tier 3 (no company snapshot; date only) ---------------------------------
 try:
@@ -186,6 +224,48 @@ try:
                          link='https://justjoin.it/job-offer/' + j['slug'], desc='', source='JustJoinIT', new_id=False))
 except Exception as e:
     log.append('justjoin ' + str(e))
+
+
+
+def adzuna_creds():
+    """ADZUNA_APP_ID / ADZUNA_APP_KEY from env, else from .claude/settings.local.json (env loads only at Claude Code start)."""
+    ids = {k: os.environ.get(k) for k in ('ADZUNA_APP_ID', 'ADZUNA_APP_KEY')}
+    if not all(ids.values()):
+        try:
+            env = json.load(open(os.path.join(ROOT, '.claude', 'settings.local.json'), encoding='utf-8')).get('env', {})
+            ids = {k: ids[k] or env.get(k) for k in ids}
+        except Exception:
+            pass
+    return ids if all(ids.values()) else None
+
+
+adz = next((s for s in D['eu_open_api']['sources'] if s['name'] == 'Adzuna'), None)
+if D['eu_open_api'].get('enabled', True) and adz and adz.get('enabled'):
+    creds = adzuna_creds()
+    if not creds:
+        log.append('adzuna: ADZUNA_APP_ID / ADZUNA_APP_KEY not set')
+    else:
+        n_adz, adz_seen = 0, set()  # the same ad comes back for several queries
+        for country, cc in adz['countries'].items():
+            for q in adz.get('queries') or D['search_queries']:
+                for pg in range(1, adz.get('max_pages', 1) + 1):
+                    try:
+                        r = get(adz['url'].format(country_code=cc, page=pg, query=requests.utils.quote(q), **creds)); r.raise_for_status()
+                    except Exception as e:
+                        log.append(f'adzuna {cc} "{q}" {type(e).__name__}')
+                        break
+                    res = r.json().get('results', [])
+                    for j in res:
+                        if norm(j.get('redirect_url')) in adz_seen:
+                            continue
+                        adz_seen.add(norm(j.get('redirect_url')))
+                        jobs.append(dict(title=strip(j.get('title')), company=(j.get('company') or {}).get('display_name', ''),
+                                         loc=f"{(j.get('location') or {}).get('display_name', '')}, {country}", date=pdt(j.get('created')),
+                                         link=j.get('redirect_url', ''), desc=strip(j.get('description')), source='Adzuna', new_id=False))
+                    n_adz = len(adz_seen)
+                    if len(res) < 50:
+                        break
+        print(f'adzuna: {n_adz} jobs', file=sys.stderr)
 
 fresh = [j for j in jobs if (j['date'] and j['date'] >= CUT) or j['new_id']]
 for j in fresh:

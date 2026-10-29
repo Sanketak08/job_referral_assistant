@@ -1,6 +1,11 @@
+import json
+
+import anyio
 from jobspy import scrape_jobs
 from mcp.server.fastmcp import FastMCP
 import pandas as pd
+
+import jobspy_search
 
 mcp = FastMCP("FreeJobScraper")
 
@@ -14,11 +19,12 @@ def scrape_free_job_boards(
     location: str,
     results_wanted: int = 20,
     country_indeed: str = "Germany",
-    sites: str = "linkedin,indeed,glassdoor",
+    sites: str = "linkedin",
     hours_old: int = 24,
     description_chars: int = 1500,
 ) -> str:
     """
+    Single raw search (no filtering). For the daily Tier 4 run use search_and_filter instead.
     Scrapes job boards for free via python-jobspy and returns a JSON string of jobs.
     sites: comma-separated subset of linkedin,indeed,glassdoor,google,zip_recruiter.
     country_indeed: country name used by Indeed/Glassdoor (e.g. Germany, Netherlands, Poland).
@@ -38,7 +44,7 @@ def scrape_free_job_boards(
             hours_old=hours_old,
             country_indeed=country_indeed,
             description_format="markdown",
-            linkedin_fetch_description=description_chars > 0,
+            fetch_description=description_chars > 0,
         )
 
         if jobs.empty:
@@ -55,6 +61,29 @@ def scrape_free_job_boards(
 
     except Exception as e:
         return f"Error scraping jobs: {str(e)}"
+
+
+@mcp.tool()
+async def search_and_filter(max_minutes: int = 0, excerpt_chars: int = 500) -> str:
+    """
+    Full Tier 4 run in one call: every query group x location from input/profile.yaml
+    (job_search.discovery.jobspy_mcp) on the sites listed there (LinkedIn), with 429 back-off, a call cap and a
+    runtime budget. Applies freshness, title, location, remote, applied-jobs, duplicate,
+    experience, language and sponsorship rules in code, and returns only the survivors.
+    Scoring against matching.minimum_score is left to the caller; each job carries
+    skill_hits, must_have_missing, required_years and sponsorship to score from.
+    max_minutes: runtime budget override (0 = profile's max_runtime_minutes).
+    excerpt_chars: description excerpt per job; full descriptions are in summary.results_file.
+    Progress is written to output/jobspy_last_run.log while it runs.
+    """
+    try:
+        summary, kept, limit = await anyio.to_thread.run_sync(lambda: jobspy_search.run(max_minutes or None))
+    except Exception as e:
+        return f"Error in search_and_filter: {type(e).__name__}: {e}"
+    jobs = [jobspy_search.compact(j, excerpt_chars) for j in kept[:limit]]
+    if len(kept) > limit:
+        summary["notes"].append(f"returned the top {limit} of {len(kept)} kept jobs by skill hits; the rest are in results_file")
+    return json.dumps({"summary": summary, "jobs": jobs}, ensure_ascii=False, default=str)
 
 
 if __name__ == "__main__":

@@ -11,14 +11,15 @@ An agent-driven daily job-hunt workflow run entirely through Claude Code skills 
 - `.claude/skills/` — the workflow (source of truth). `.agents/skills/` is an older copy; edit `.claude/skills/`.
 - `.claude/settings.json` — shared permissions (everything allowed, `bypassPermissions`). `.claude/settings.local.json` — gitignored, holds the MCP secrets as `env` values.
 - `.mcp.json` — MCP servers: `playwright`, `apify`, `apollo-io`, `tavily`, `gmail`. Secrets are `${VAR}` references filled from `settings.local.json`.
+- `.agents/jobspy_mcp.py` — JobSpy MCP server. `search_and_filter` runs the LinkedIn part of Tier 4 with every hard filter applied in code by `.agents/jobspy_search.py` (also runnable directly). `scrape_free_job_boards` is a single raw search. Progress: `output/jobspy_last_run.log`; results: `output/jobspy_results_*.json`.
 - `.agents/gmail_mcp.py` — custom Gmail SMTP MCP server (tool `send_email_with_attachment(to_email, subject, body, attachment_path)`, uses `GMAIL_ADDRESS` / `GMAIL_APP_PASSWORD`). Needs the `mcp` Python package.
 - `input/profile.yaml` — candidate source of truth (titles, exclusions, tech stack, answers to form fields, `email_signature`). `input/resumes/` holds the PDFs (`Sanket_Backend_Engineer_EU.pdf`, `Sanket_Data_Engineer_EU.pdf`, `Sanket_Agentic_AI_Engineer_EU.pdf`).
-- `output/` — `daily_jobs_[DATE]_[TIME].csv`, `applied_jobs.csv` (`Company, Job Title, Job Link, Timestamp`), `contacted_people.csv`.
+- `output/` — `daily_jobs_[DATE]_[TIME].csv`, `applied_jobs.csv` (no header: `Job Link, Timestamp`), `contacted_people.csv`.
 - `scratch/` — one-off Playwright scripts; root PNGs and `hyra_job.html` are throwaway artifacts.
 
 ## Skills (run in order by `daily-pipeline`)
 
-1. `job-search-phase` — Tier 1: public ATS JSON APIs (Greenhouse/Lever/Workday); Tier 2: Apify (LinkedIn/Indeed/Xing). Hard-discard jobs older than 24h, dedupe against `applied_jobs.csv`, score against the profile, write `daily_jobs_[DATE]_[TIME].csv` (`Job Title, Company, Date Posted, Match Score, Ranking, Source, Job Link`). Output only the file path.
+1. `job-search-phase` — Tier 1: public ATS JSON APIs (Greenhouse/Lever/Workday); Tier 2: target companies; Tier 3: EU open APIs; Tier 3b: Indeed connector; Tier 4: JobSpy (LinkedIn) + extra boards (Xing, Reed, NoFluffJobs, BerlinStartupJobs) via headless Playwright in `scripts/fetch_boards.py`. Hard-discard jobs older than 24h, dedupe against `applied_jobs.csv`, score against the profile, write `daily_jobs_[DATE]_[TIME].csv` (`Job Title, Company, Date Posted, Match Score, Ranking, Source, Job Link`). Output only the file path.
 2. `job-application-phase` — Playwright MCP fills each ATS form from `profile.yaml`. Mandatory field unknown → pause and ask; optional unknown → leave blank. Upload the resume, screenshot, **wait for explicit approval before submit**, then log to `applied_jobs.csv`.
 3. `job-referral-phase` — Tavily finds 5–6 engineers per company (Principal/Staff/Senior first, step down to mid/junior; never managers, directors or recruiters). Pause for the user to supply business emails (Apollo is not used for this step in the skill text). Draft plain human emails (no "delve", no em dashes, no generic openings, append `email_signature`), get approval, send via Gmail MCP with the PDF attached (never a Drive link), log to `contacted_people.csv`.
 

@@ -156,7 +156,6 @@ job_search:
   # Add a company/board by appending to a list; no skill edits required.
   # ----------------------------------------------------------
   discovery:
-    stop_after_tier_if_results_gte: null   # e.g. 25 to skip lower tiers once enough fresh matches exist
     max_results_in_csv: 25
     request_timeout_seconds: 20
     max_parallel_requests: 10
