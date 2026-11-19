@@ -1,8 +1,14 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { TabId } from '@jobhunt/shared';
 
 const serverSrc = path.dirname(fileURLToPath(import.meta.url));
+
+// Optional overrides. Loaded here rather than with `node --env-file-if-exists`, which logs a
+// warning on every start when the file is missing.
+const envFile = path.resolve(serverSrc, '../../.env');
+if (fs.existsSync(envFile)) process.loadEnvFile(envFile);
 
 /** Claude runs from the repo root so CLAUDE.md, .claude/skills and .mcp.json load as in the terminal. */
 export const REPO_ROOT = path.resolve(serverSrc, '../../..');
