@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import type { RunEvent, RunKind, RunStatus, StoredEvent, TabId } from '@jobhunt/shared';
+import type { RunEvent, RunKind, RunStatus, RunSummary, StoredEvent, TabId } from '@jobhunt/shared';
 import { DB_PATH } from '../config.ts';
 
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
@@ -101,6 +101,43 @@ function toStoredEvent(row: EventRow): StoredEvent {
     at: row.at,
     event: JSON.parse(row.data) as RunEvent,
   };
+}
+
+interface RunRow {
+  id: number;
+  tab: TabId;
+  kind: RunKind;
+  prompt: string;
+  status: RunSummary['status'];
+  session_id: string | null;
+  cost_usd: number | null;
+  started_at: string;
+  ended_at: string | null;
+}
+
+/** Newest runs first. */
+export function listRuns(limit: number): RunSummary[] {
+  const rows = db
+    .prepare('SELECT * FROM runs ORDER BY id DESC LIMIT ?')
+    .all(limit) as unknown as RunRow[];
+  return rows.map((r) => ({
+    id: r.id,
+    tab: r.tab,
+    kind: r.kind,
+    prompt: r.prompt,
+    status: r.status,
+    sessionId: r.session_id,
+    costUsd: r.cost_usd,
+    startedAt: r.started_at,
+    endedAt: r.ended_at,
+  }));
+}
+
+export function runEvents(runId: number): StoredEvent[] {
+  const rows = db
+    .prepare('SELECT * FROM events WHERE run_id = ? ORDER BY id')
+    .all(runId) as unknown as EventRow[];
+  return rows.map(toStoredEvent);
 }
 
 export function findRunTab(runId: number): TabId | null {

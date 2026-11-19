@@ -4,15 +4,24 @@ import type {
   ApprovalRequest,
   MessageRequest,
   Outputs,
+  ProfileFile,
   RunRequest,
+  RunSummary,
+  SaveProfileRequest,
+  StoredEvent,
 } from '@jobhunt/shared';
 import { Router, type Request, type Response } from 'express';
-import { COMPACT_PROMPT, findTab, TABS, type TabPreset } from '../config.ts';
+import { COMPACT_PROMPT, findTab, HISTORY_LIMIT, TABS, type TabPreset } from '../config.ts';
 import { readOutputs } from '../files/outputs.ts';
-import { readFirstName } from '../files/profile.ts';
+import {
+  ProfileConflictError,
+  readFirstName,
+  readProfile,
+  writeProfile,
+} from '../files/profile.ts';
 import { decide } from '../mcp/approvals.ts';
 import { isRunning, setTabSession, startRun, stopRun } from '../runner/runner.ts';
-import { getTabSession } from '../store/db.ts';
+import { getTabSession, listRuns, runEvents } from '../store/db.ts';
 
 export const apiRouter = Router();
 
@@ -137,5 +146,40 @@ apiRouter.post(
         .status(404)
         .json({ error: 'This request was already answered or has expired' });
     res.json({ ok: true });
+  },
+);
+
+apiRouter.get('/runs', (_req, res: Response<RunSummary[]>) => {
+  res.json(listRuns(HISTORY_LIMIT));
+});
+
+apiRouter.get('/runs/:id/events', (req: Request<{ id: string }>, res: Response<StoredEvent[]>) => {
+  res.json(runEvents(Number(req.params.id)));
+});
+
+apiRouter.get('/profile', (_req, res: Reply<ProfileFile>) => {
+  try {
+    res.json(readProfile());
+  } catch {
+    res
+      .status(404)
+      .json({ error: 'input/profile.yaml not found. Copy profile.example.yaml first.' });
+  }
+});
+
+apiRouter.put(
+  '/profile',
+  (req: Request<unknown, unknown, SaveProfileRequest>, res: Reply<ProfileFile>) => {
+    const { text, baseModifiedAt } = req.body;
+    if (typeof text !== 'string' || !text.trim()) {
+      return void res.status(400).json({ error: 'The profile cannot be empty' });
+    }
+    try {
+      res.json(writeProfile(text, baseModifiedAt));
+    } catch (err) {
+      if (err instanceof ProfileConflictError)
+        return void res.status(409).json({ error: err.message });
+      throw err;
+    }
   },
 );

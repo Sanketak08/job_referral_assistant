@@ -10,6 +10,8 @@ import { useTheme } from './hooks/useTheme.ts';
 import { groupRuns, tabStatus, type RunView, type TabStatus } from './tabs/runs.ts';
 import { newJobCount, resultsFor } from './tabs/results.tsx';
 import { TabView } from './tabs/TabView.tsx';
+import { HistoryPage } from './pages/HistoryPage.tsx';
+import { ProfilePage } from './pages/ProfilePage.tsx';
 
 export function App() {
   const [app, setApp] = useState<AppInfo | null>(null);
@@ -50,7 +52,12 @@ export function App() {
       .catch((err: unknown) => setHandoffError(errorMessage(err)));
   };
 
-  const activeTab = app?.tabs.find((tab) => tab.id === view) ?? app?.tabs[0];
+  const page = view === 'history' || view === 'profile' ? view : null;
+  const activeTab = page ? undefined : (app?.tabs.find((tab) => tab.id === view) ?? app?.tabs[0]);
+  // Changes whenever a run starts or ends, so the history list refetches.
+  const runEventsSeen = events.filter(
+    (e) => e.event.type === 'run_started' || e.event.type === 'run_finished',
+  ).length;
 
   return (
     <div className={menuOpen ? 'layout menu-open' : 'layout'}>
@@ -79,6 +86,8 @@ export function App() {
             {handoffError}
           </div>
         )}
+        {page === 'history' && <HistoryPage tabs={app?.tabs ?? []} version={runEventsSeen} />}
+        {page === 'profile' && <ProfilePage />}
         {activeTab && (
           <TabView
             key={activeTab.id}

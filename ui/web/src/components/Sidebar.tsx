@@ -52,6 +52,19 @@ export function Sidebar(props: Props) {
             count={counts[tab.id]}
           />
         ))}
+        <p className="nav-label nav-label-gap">Workspace</p>
+        <NavItem
+          icon="history"
+          label="History"
+          active={view === 'history'}
+          onClick={() => onNavigate('history')}
+        />
+        <NavItem
+          icon="user"
+          label="Profile"
+          active={view === 'profile'}
+          onClick={() => onNavigate('profile')}
+        />
       </nav>
 
       <div className="usage-card">

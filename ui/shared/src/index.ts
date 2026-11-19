@@ -149,6 +149,31 @@ export interface MessageRequest {
   text: string;
 }
 
+/** One row of the run history. */
+export interface RunSummary {
+  id: number;
+  tab: TabId;
+  kind: RunKind;
+  prompt: string;
+  /** 'running' or a RunStatus. */
+  status: RunStatus | 'running';
+  sessionId: string | null;
+  costUsd: number | null;
+  startedAt: string;
+  endedAt: string | null;
+}
+
+export interface ProfileFile {
+  text: string;
+  /** File modification time (ms), sent back on save to detect edits made in the meantime. */
+  modifiedAt: number;
+}
+
+export interface SaveProfileRequest {
+  text: string;
+  baseModifiedAt: number;
+}
+
 export interface ApiError {
   error: string;
 }

@@ -1731,3 +1731,134 @@ nav {
     gap: 2px;
   }
 }
+
+/* ---------- Pages: history & profile ---------- */
+
+.nav-label-gap {
+  margin-top: 18px;
+}
+
+.page-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.stat-hint {
+  color: var(--ok);
+  font-size: 12px;
+}
+
+.section-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.section-title h3 {
+  font-size: 15px;
+}
+
+.cell-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.link-button {
+  max-width: 420px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 550;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--primary-text);
+  text-decoration: underline;
+}
+
+.dialog-wide {
+  width: min(980px, 100%);
+}
+
+.dialog-stream {
+  display: flex;
+  flex-direction: column;
+  height: min(70dvh, 720px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.profile-path {
+  font-size: 12.5px;
+}
+
+.profile-note {
+  margin: 0;
+}
+
+.profile-note code {
+  font-size: 12px;
+}
+
+.profile-editor {
+  flex: 1;
+  white-space: pre;
+  overflow: auto;
+  min-height: 420px;
+  line-height: 1.55;
+  resize: none;
+  tab-size: 2;
+}
+
+@media (max-width: 640px) {
+  .link-button {
+    max-width: 220px;
+  }
+
+  .profile-editor {
+    min-height: 60dvh;
+  }
+}

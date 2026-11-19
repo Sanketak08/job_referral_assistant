@@ -1,6 +1,19 @@
-import type { ApiError, AppInfo, JobRef, Outputs, TabId } from '@jobhunt/shared';
+import type {
+  ApiError,
+  AppInfo,
+  JobRef,
+  Outputs,
+  ProfileFile,
+  RunSummary,
+  StoredEvent,
+  TabId,
+} from '@jobhunt/shared';
 
-async function request<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
+async function request<T>(
+  method: 'GET' | 'POST' | 'PUT',
+  path: string,
+  body?: unknown,
+): Promise<T> {
   const res = await fetch(`/api${path}`, {
     method,
     headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
@@ -25,6 +38,11 @@ export const api = {
   compact: (tab: TabId): Started => request('POST', `/tabs/${tab}/compact`),
   newSession: (tab: TabId) => request<{ ok: true }>('POST', `/tabs/${tab}/new-session`),
   stop: (tab: TabId) => request<{ stopped: boolean }>('POST', `/tabs/${tab}/stop`),
+  runs: () => request<RunSummary[]>('GET', '/runs'),
+  runEvents: (runId: number) => request<StoredEvent[]>('GET', `/runs/${runId}/events`),
+  profile: () => request<ProfileFile>('GET', '/profile'),
+  saveProfile: (text: string, baseModifiedAt: number) =>
+    request<ProfileFile>('PUT', '/profile', { text, baseModifiedAt }),
   approve: (requestId: string, allow: boolean) =>
     request<{ ok: true }>('POST', `/approvals/${requestId}`, { allow }),
 };

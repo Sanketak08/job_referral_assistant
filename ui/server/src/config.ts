@@ -15,7 +15,7 @@ export const REPO_ROOT = path.resolve(serverSrc, '../../..');
 export const WEB_ROOT = path.resolve(serverSrc, '../../web');
 export const DB_PATH = process.env.DB_PATH ?? path.resolve(serverSrc, '../../data/jobhunt.db');
 
-export const PROFILE_PATH = path.join(REPO_ROOT, 'input/profile.yaml');
+export const PROFILE_PATH = process.env.PROFILE_PATH ?? path.join(REPO_ROOT, 'input/profile.yaml');
 /** Where the skills write their CSVs (daily_jobs_*.csv, applied_jobs.csv, contacted_people.csv). */
 export const OUTPUT_DIR = path.join(REPO_ROOT, 'output');
 
@@ -24,6 +24,8 @@ export const HOST = process.env.HOST ?? '127.0.0.1';
 export const CLAUDE_BIN = process.env.CLAUDE_BIN ?? 'claude';
 export const IS_DEV = process.env.NODE_ENV !== 'production';
 
+/** How many runs the History page lists. */
+export const HISTORY_LIMIT = 500;
 /** How many past runs per tab the browser receives when it connects. */
 export const HISTORY_RUNS_PER_TAB = 20;
 /** Tool inputs and results longer than this are cut before they are stored and shown. */

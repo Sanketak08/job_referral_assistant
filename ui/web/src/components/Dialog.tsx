@@ -3,12 +3,13 @@ import { Icon } from './Icon.tsx';
 
 interface Props {
   title: string;
+  wide?: boolean;
   onClose: () => void;
   children: ReactNode;
   footer: ReactNode;
 }
 
-export function Dialog({ title, onClose, children, footer }: Props) {
+export function Dialog({ title, wide, onClose, children, footer }: Props) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') onClose();
@@ -19,7 +20,12 @@ export function Dialog({ title, onClose, children, footer }: Props) {
 
   return (
     <div className="backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="dialog" role="dialog" aria-modal="true" aria-label={title}>
+      <div
+        className={wide ? 'dialog dialog-wide' : 'dialog'}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
         <header className="dialog-head">
           <h2>{title}</h2>
           <button className="btn btn-ghost btn-icon" onClick={onClose} aria-label="Close">
