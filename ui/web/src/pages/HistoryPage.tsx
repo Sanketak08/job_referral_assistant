@@ -116,7 +116,7 @@ export function HistoryPage({ tabs, version }: Props) {
         rowKey={(r) => String(r.id)}
         emptyText="No runs yet."
         initialSort={{ key: 'id', dir: 'desc' }}
-        pageSize={15}
+        pageSize={25}
       />
       {open && (
         <RunDialog

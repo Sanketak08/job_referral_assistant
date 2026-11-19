@@ -33,15 +33,42 @@ interface Props<T> {
   onSelectedChange?: (next: Set<string>) => void;
   /** Adds a "⋯" menu at the end of each row. */
   rowActions?: (row: T) => RowAction[];
+  /** Rows per page until the user picks a size; their pick then applies to every table. */
   pageSize?: number;
+}
+
+const PAGE_SIZES = [10, 25, 50, 100] as const;
+const PAGE_SIZE_KEY = 'jobhunt.pageSize';
+
+function storedPageSize(): number | null {
+  try {
+    const value = Number(localStorage.getItem(PAGE_SIZE_KEY));
+    return PAGE_SIZES.some((size) => size === value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function storePageSize(size: number): void {
+  try {
+    localStorage.setItem(PAGE_SIZE_KEY, String(size));
+  } catch {
+    // Private mode or blocked storage: the choice just won't persist.
+  }
 }
 
 /** The one table used everywhere: sortable headers, pagination, optional selection and row menu. */
 export function DataTable<T>(props: Props<T>) {
   const { rows, columns, rowKey, emptyText, selected, onSelectedChange, rowActions } = props;
-  const pageSize = props.pageSize ?? 10;
+  const [pageSize, setPageSize] = useState(() => storedPageSize() ?? props.pageSize ?? 10);
   const [sort, setSort] = useState<Sort | undefined>(props.initialSort);
   const [page, setPage] = useState(0);
+
+  const changePageSize = (size: number): void => {
+    setPageSize(size);
+    setPage(0);
+    storePageSize(size);
+  };
 
   const sorted = sortRows(rows, columns, sort);
   const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
@@ -150,6 +177,21 @@ export function DataTable<T>(props: Props<T>) {
           <span className="muted"> · {rows.length} total</span>
         </span>
         <div className="pager">
+          <label className="page-size">
+            <span className="page-size-long">Rows per page</span>
+            <span className="page-size-short">Rows</span>
+            <select
+              className="select"
+              value={pageSize}
+              onChange={(e) => changePageSize(Number(e.target.value))}
+            >
+              {PAGE_SIZES.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             className="btn btn-sm"
             disabled={current === 0}
