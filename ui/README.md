@@ -93,15 +93,17 @@ in. Optional settings go in `ui/.env` (see `.env.example`).
 ```sh
 cd ui
 npm install
-npm run dev          # server + Vite hot reload for the web app, one port
+npm run dev          # nodemon server + Vite hot reload for the web app, one port
 ```
 
-The server does not auto-restart (a restart would kill a running Claude process); restart it
-yourself after changing server code.
+Nothing needs a manual restart in dev: web changes hot-reload in the browser, and nodemon
+restarts the server when `server/src` or `shared/src` changes (`server/nodemon.json`). A restart
+interrupts any run in progress; its Claude session survives, so send a message in that tab to
+continue. For long Apply or Referral runs, use `./start.sh` (no file watching) instead.
 
 | Script              | Does                                                        |
 | ------------------- | ----------------------------------------------------------- |
-| `npm run dev`       | Server + Vite hot reload                                    |
+| `npm run dev`       | Server (nodemon) + Vite hot reload                          |
 | `npm run build`     | Builds `web/dist`                                           |
 | `npm start`         | Build, then serve the built app                             |
 | `npm run typecheck` | `tsc --noEmit` for shared, server and web                   |

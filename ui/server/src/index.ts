@@ -6,6 +6,7 @@ import { watchOutputs } from './files/outputs.ts';
 import { attachLive, broadcast } from './live.ts';
 import { mcpRouter } from './mcp/permissionServer.ts';
 import { apiRouter } from './routes/api.ts';
+import { stopAllRuns } from './runner/runner.ts';
 import { closeInterruptedRuns, getTabSession, recentEvents } from './store/db.ts';
 
 if (process.env.ANTHROPIC_API_KEY) {
@@ -48,3 +49,10 @@ if (IS_DEV) {
 server.listen(PORT, HOST, () => {
   console.log(`Job hunt UI: http://${HOST}:${PORT}${IS_DEV ? ' (dev)' : ''}`);
 });
+
+for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+  process.on(signal, () => {
+    stopAllRuns();
+    process.exit(0);
+  });
+}

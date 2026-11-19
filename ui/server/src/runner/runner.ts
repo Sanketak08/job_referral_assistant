@@ -102,6 +102,14 @@ export function stopRun(tab: TabId): boolean {
   return true;
 }
 
+/**
+ * Interrupts every run when the server shuts down (Ctrl+C, nodemon restart), so no Claude
+ * process keeps working with nobody listening. Their sessions can be continued from the chat box.
+ */
+export function stopAllRuns(): void {
+  for (const run of active.values()) run.child.kill('SIGINT');
+}
+
 export function setTabSession(tab: TabId, sessionId: string | null): void {
   store.setTabSession(tab, sessionId);
   broadcast({ type: 'session', tab, sessionId });
