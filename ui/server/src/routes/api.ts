@@ -3,6 +3,7 @@ import type {
   AppInfo,
   ApprovalRequest,
   MessageRequest,
+  MessageResult,
   Outputs,
   ProfileFile,
   RunRequest,
@@ -20,7 +21,7 @@ import {
   writeProfile,
 } from '../files/profile.ts';
 import { decide } from '../mcp/approvals.ts';
-import { isRunning, setTabSession, startRun, stopRun } from '../runner/runner.ts';
+import { isRunning, sendToRun, setTabSession, startRun, stopRun } from '../runner/runner.ts';
 import { getTabSession, listRuns, runEvents } from '../store/db.ts';
 
 export const apiRouter = Router();
@@ -84,20 +85,23 @@ apiRouter.post(
   },
 );
 
-/** Chat box: continues the tab's current session, or starts one after "New session". */
+/** Chat box: talks to the running Claude, or continues the tab's session (new after "New session"). */
 apiRouter.post(
   '/tabs/:tab/message',
-  (req: Request<{ tab: string }, unknown, MessageRequest>, res: Reply<{ runId: number }>) => {
-    const tab = tabFor(req, res, true);
+  (req: Request<{ tab: string }, unknown, MessageRequest>, res: Reply<MessageResult>) => {
+    const tab = tabFor(req, res, false);
     if (!tab) return;
     const text = req.body.text?.trim();
     if (!text) return void res.status(400).json({ error: 'Message is empty' });
+    // While a run is working, the message goes straight to it.
+    const live = sendToRun(tab.id, text);
+    if (live) return void res.status(202).json(live);
     const runId = startRun(tab, {
       kind: 'message',
       prompt: text,
       resumeSessionId: getTabSession(tab.id),
     });
-    res.status(202).json({ runId });
+    res.status(202).json({ runId, delivery: 'new_run' });
   },
 );
 

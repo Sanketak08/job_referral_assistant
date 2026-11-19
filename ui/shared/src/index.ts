@@ -50,6 +50,8 @@ export type RunEvent =
   | { type: 'run_started'; prompt: string; kind: RunKind; resumedSessionId: string | null }
   | { type: 'session'; sessionId: string; model: string }
   | { type: 'text'; text: string }
+  /** A chat message sent while the run was already working. */
+  | { type: 'user_message'; text: string }
   | { type: 'tool_use'; toolUseId: string; name: string; summary: string; input: string }
   | {
       type: 'tool_result';
@@ -147,6 +149,15 @@ export interface ApprovalRequest {
 
 export interface MessageRequest {
   text: string;
+}
+
+/**
+ * new_run: started a run that continues the session. sent: handed to the running Claude.
+ * queued: Claude was finishing its turn; the message starts the next run automatically.
+ */
+export interface MessageResult {
+  runId: number;
+  delivery: 'new_run' | 'sent' | 'queued';
 }
 
 /** One row of the run history. */

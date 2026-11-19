@@ -107,6 +107,13 @@ function RunBlock({ run, onDecide }: { run: RunView; onDecide: DecideApproval })
                 conversation
               </div>
             );
+          case 'user_message':
+            return (
+              <div key={id} className="msg-user">
+                <span className="msg-label">Sent while Claude was working</span>
+                {event.text}
+              </div>
+            );
           case 'log':
             return (
               <div key={id} className="log">

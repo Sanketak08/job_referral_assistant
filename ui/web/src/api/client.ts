@@ -2,6 +2,7 @@ import type {
   ApiError,
   AppInfo,
   JobRef,
+  MessageResult,
   Outputs,
   ProfileFile,
   RunSummary,
@@ -34,7 +35,8 @@ export const api = {
   outputs: () => request<Outputs>('GET', '/outputs'),
   run: (tab: TabId, prompt?: string): Started => request('POST', `/tabs/${tab}/run`, { prompt }),
   handoff: (tab: TabId, jobs: JobRef[]): Started => request('POST', `/tabs/${tab}/run`, { jobs }),
-  message: (tab: TabId, text: string): Started => request('POST', `/tabs/${tab}/message`, { text }),
+  message: (tab: TabId, text: string) =>
+    request<MessageResult>('POST', `/tabs/${tab}/message`, { text }),
   compact: (tab: TabId): Started => request('POST', `/tabs/${tab}/compact`),
   newSession: (tab: TabId) => request<{ ok: true }>('POST', `/tabs/${tab}/new-session`),
   stop: (tab: TabId) => request<{ stopped: boolean }>('POST', `/tabs/${tab}/stop`),

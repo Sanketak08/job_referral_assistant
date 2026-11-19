@@ -12,7 +12,13 @@ import { buildArgs } from './args.ts';
 interface ActiveRun {
   runId: number;
   tab: TabId;
+  preset: TabPreset;
+  kind: RunKind;
   child: ChildProcessWithoutNullStreams;
+  /** stdin stays open so messages typed mid-run reach Claude, like typing in the terminal. */
+  inputOpen: boolean;
+  /** Messages that arrived after Claude finished its turn; sent as the next run on exit. */
+  queued: string[];
   stopRequested: boolean;
   /** The CLI's own result line. Recorded only when the process exits, so the Run button stays
    *  disabled until MCP servers have shut down. */
@@ -49,7 +55,11 @@ export function startRun(tab: TabPreset, { kind, prompt, resumeSessionId }: RunO
   const run: ActiveRun = {
     runId,
     tab: tab.id,
+    preset: tab,
+    kind,
     child,
+    inputOpen: true,
+    queued: [],
     stopRequested: false,
     result: null,
     stderrTail: '',
@@ -58,13 +68,15 @@ export function startRun(tab: TabPreset, { kind, prompt, resumeSessionId }: RunO
 
   // EPIPE here means the process already exited; 'close' reports that, so don't crash on it.
   child.stdin.on('error', () => {});
-  child.stdin.end(prompt);
+  writeUserMessage(run, prompt);
 
   const parse = createParser();
   readline.createInterface({ input: child.stdout }).on('line', (line) => {
     for (const event of parse(line)) {
       if (event.type === 'run_finished') {
         run.result = event;
+        // The turn is over: close input so the process exits and the run ends.
+        closeInput(run);
         continue;
       }
       if (event.type === 'session') {
@@ -90,11 +102,43 @@ export function startRun(tab: TabPreset, { kind, prompt, resumeSessionId }: RunO
   return runId;
 }
 
+export type Delivery = 'sent' | 'queued';
+
+/**
+ * Hands a chat message to the running Claude. It reads it at its next step, as when typing into
+ * a busy terminal. If the turn is already ending (or it is a /compact), the message waits and
+ * starts the next run in the same session.
+ */
+export function sendToRun(tab: TabId, text: string): { runId: number; delivery: Delivery } | null {
+  const run = active.get(tab);
+  if (!run) return null;
+  if (!run.inputOpen || run.kind === 'compact') {
+    run.queued.push(text);
+    return { runId: run.runId, delivery: 'queued' };
+  }
+  writeUserMessage(run, text);
+  record(run.runId, run.tab, { type: 'user_message', text });
+  return { runId: run.runId, delivery: 'sent' };
+}
+
+function writeUserMessage(run: ActiveRun, text: string): void {
+  const line = { type: 'user', message: { role: 'user', content: text } };
+  run.child.stdin.write(`${JSON.stringify(line)}\n`);
+}
+
+function closeInput(run: ActiveRun): void {
+  if (!run.inputOpen) return;
+  run.inputOpen = false;
+  run.child.stdin.end();
+}
+
 /** Interrupts the run like Ctrl+C. The Claude session stays on disk and can be resumed. */
 export function stopRun(tab: TabId): boolean {
   const run = active.get(tab);
   if (!run) return false;
   run.stopRequested = true;
+  run.queued = [];
+  closeInput(run);
   run.child.kill('SIGINT');
   setTimeout(() => {
     if (active.get(tab) === run) run.child.kill('SIGKILL');
@@ -130,6 +174,15 @@ function finish(run: ActiveRun, exitCode: number | null): void {
 
   store.finishRun(run.runId, event.status, event.costUsd);
   record(run.runId, run.tab, event);
+
+  // Stop empties the queue, so anything here was sent after the turn ended or after Stop.
+  if (run.queued.length) {
+    startRun(run.preset, {
+      kind: 'message',
+      prompt: run.queued.join('\n\n'),
+      resumeSessionId: store.getTabSession(run.tab),
+    });
+  }
 }
 
 function emptyResult(): RunFinishedEvent {

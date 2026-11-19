@@ -138,7 +138,7 @@ export function TabView({ info, runs, sessionId, results }: Props) {
               onDecide={(requestId, allow) => act(() => api.approve(requestId, allow))}
             />
             <Composer
-              busy={busy}
+              running={busy}
               sessionId={sessionId}
               contextTokens={contextTokens}
               onSend={(text) => act(() => api.message(info.id, text))}

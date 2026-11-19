@@ -1097,6 +1097,10 @@ nav {
   font-size: 12px;
 }
 
+.composer-queued {
+  color: var(--attn-text);
+}
+
 .composer-keys {
   margin-left: auto;
 }

@@ -7,9 +7,10 @@ const HEADLESS_NOTE = [
   'When you need a decision, an approval or missing information from the user,',
   'ask in plain text at the end of your reply and end your turn.',
   'The answer arrives as the next message in this session.',
+  'The user may also send messages while you work; take them into account at your next step.',
 ].join(' ');
 
-/** CLI arguments for one run. The prompt itself goes to stdin, so it can never be read as a flag. */
+/** CLI arguments for one run. Prompts go to stdin as stream-json, so they can never be read as flags. */
 export function buildArgs(tab: TabPreset, runId: number, resumeSessionId: string | null): string[] {
   const disallowed = ['AskUserQuestion', ...disallowedMcpServers(tab).map((s) => `mcp__${s}`)];
   // The tab's own servers are pre-approved; anything else that needs permission comes to the UI.
@@ -23,6 +24,9 @@ export function buildArgs(tab: TabPreset, runId: number, resumeSessionId: string
   return [
     ...(resumeSessionId ? ['--resume', resumeSessionId] : []),
     '--print',
+    // Messages go in as stream-json on stdin, so more can be sent while Claude works.
+    '--input-format',
+    'stream-json',
     '--output-format',
     'stream-json',
     '--verbose',
