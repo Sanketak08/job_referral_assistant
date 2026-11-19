@@ -1,93 +1,128 @@
 /* ---------- Tokens ---------- */
+/* Warm cream, charcoal and orange, after the Greenhouse job board the user liked; colours carry
+   meaning (see comments) rather than decoration. Dark mode keeps the same warm hues. */
 
 :root {
-  --bg: #f4f6fb;
-  --panel: #ffffff;
-  --panel-2: #f8f9fc;
-  --panel-3: #eef1f8;
-  --text: #18202f;
-  --text-2: #4a5468;
-  --muted: #7a8396;
-  --border: #e4e8f0;
-  --border-strong: #d3d9e5;
-  --primary: #2453e6;
-  --primary-2: #1c44c9;
-  --primary-soft: #e9efff;
-  --primary-text: #1f4bd6;
-  --dark: #111827;
-  --dark-text: #ffffff;
-  --ok: #16a34a;
-  --ok-soft: #e6f7ec;
-  --warn: #b7791f;
-  --warn-soft: #fdf3e2;
-  --err: #dc2626;
-  --err-soft: #fdecec;
-  --banner-from: #2f62f2;
-  --banner-to: #1d47d6;
-  --shadow: 0 1px 2px rgb(16 24 40 / 4%), 0 1px 3px rgb(16 24 40 / 6%);
-  --shadow-lg: 0 12px 32px rgb(16 24 40 / 14%);
-  --radius: 14px;
-  --radius-sm: 9px;
+  --bg: #fff5e3;
+  --panel: #fffaf2;
+  --panel-2: #fdf1dd;
+  --panel-3: #f6e7ce;
+  --text: #2d2a27;
+  --text-2: #4b463f;
+  --muted: #766d62;
+  --border: #ebddc5;
+  --border-strong: #dccaad;
+  /* Orange means "act": primary actions and anything waiting for you. */
+  --primary: #ff7023;
+  --primary-2: #f2620f;
+  --on-primary: #2d2a27;
+  --primary-soft: #ffe6d3;
+  --primary-text: #b4470f;
+  --dark: #2d2a27;
+  --dark-text: #fff5e3;
+  --bubble: #2d2a27;
+  --bubble-text: #fff5e3;
+  /* Sienna marks new items, like the "New" tags on the job board. */
+  --sienna: #a9562f;
+  /* Forest green means "good": ready, complete, strong match. */
+  --ok: #2e6a4e;
+  --ok-soft: #e2eee4;
+  --warn: #9a5a0e;
+  --warn-soft: #fbebd1;
+  --err: #b42318;
+  --err-soft: #fde8e3;
+  --banner-ready: linear-gradient(120deg, #15372c, #2c5545);
+  --banner-running: linear-gradient(120deg, #2d2a27, #4a4038);
+  --banner-attention: linear-gradient(120deg, #ff7023, #ff9248);
+  --banner-failed: linear-gradient(120deg, #8e2a1a, #6e1f13);
+  --banner-stopped: linear-gradient(120deg, #5e4230, #7a5639);
+  --banner-text: #fff5e3;
+  --banner-attention-text: #2d2a27;
+  --scrim: rgb(45 42 39 / 45%);
+  --shadow: 0 1px 2px rgb(45 42 39 / 6%), 0 1px 3px rgb(45 42 39 / 8%);
+  --shadow-lg: 0 14px 34px rgb(45 42 39 / 18%);
+  --radius: 10px;
+  --radius-sm: 6px;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #0b0f17;
-    --panel: #121826;
-    --panel-2: #161d2d;
-    --panel-3: #1c2436;
-    --text: #e8ecf4;
-    --text-2: #b6bfd0;
-    --muted: #8590a5;
-    --border: #232c3f;
-    --border-strong: #2e3850;
-    --primary: #4a77ff;
-    --primary-2: #3a66f0;
-    --primary-soft: #1a2647;
-    --primary-text: #8aa8ff;
-    --dark: #f1f4fa;
-    --dark-text: #0d1220;
-    --ok: #3ccb6f;
-    --ok-soft: #12301f;
-    --warn: #e2a948;
-    --warn-soft: #33270f;
-    --err: #f2665f;
-    --err-soft: #3a1717;
-    --banner-from: #2a52d6;
-    --banner-to: #1a3aa6;
-    --shadow: 0 1px 2px rgb(0 0 0 / 30%);
-    --shadow-lg: 0 16px 40px rgb(0 0 0 / 50%);
+    --bg: #1a1714;
+    --panel: #221e1a;
+    --panel-2: #29241f;
+    --panel-3: #332d27;
+    --text: #f3e9da;
+    --text-2: #d4c8b7;
+    --muted: #a39887;
+    --border: #3a332c;
+    --border-strong: #4b4239;
+    --primary: #ff7a33;
+    --primary-2: #ff8a4d;
+    --on-primary: #1a1714;
+    --primary-soft: #3a2414;
+    --primary-text: #ff9a5c;
+    --dark: #f3e9da;
+    --dark-text: #1a1714;
+    --bubble: #3a332c;
+    --bubble-text: #f3e9da;
+    --sienna: #a9562f;
+    --ok: #86cba0;
+    --ok-soft: #1d3127;
+    --warn: #e8a54b;
+    --warn-soft: #33260f;
+    --err: #f28b76;
+    --err-soft: #3a1c16;
+    --banner-ready: linear-gradient(120deg, #143027, #1e4537);
+    --banner-running: linear-gradient(120deg, #2a2520, #3a332c);
+    --banner-attention: linear-gradient(120deg, #ff7a33, #f2620f);
+    --banner-failed: linear-gradient(120deg, #6e1f13, #8e2a1a);
+    --banner-stopped: linear-gradient(120deg, #4a3526, #5e4230);
+    --banner-text: #f3e9da;
+    --banner-attention-text: #1a1714;
+    --scrim: rgb(0 0 0 / 55%);
+    --shadow: 0 1px 2px rgb(0 0 0 / 35%);
+    --shadow-lg: 0 16px 40px rgb(0 0 0 / 55%);
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: #0b0f17;
-  --panel: #121826;
-  --panel-2: #161d2d;
-  --panel-3: #1c2436;
-  --text: #e8ecf4;
-  --text-2: #b6bfd0;
-  --muted: #8590a5;
-  --border: #232c3f;
-  --border-strong: #2e3850;
-  --primary: #4a77ff;
-  --primary-2: #3a66f0;
-  --primary-soft: #1a2647;
-  --primary-text: #8aa8ff;
-  --dark: #f1f4fa;
-  --dark-text: #0d1220;
-  --ok: #3ccb6f;
-  --ok-soft: #12301f;
-  --warn: #e2a948;
-  --warn-soft: #33270f;
-  --err: #f2665f;
-  --err-soft: #3a1717;
-  --banner-from: #2a52d6;
-  --banner-to: #1a3aa6;
-  --shadow: 0 1px 2px rgb(0 0 0 / 30%);
-  --shadow-lg: 0 16px 40px rgb(0 0 0 / 50%);
+  --bg: #1a1714;
+  --panel: #221e1a;
+  --panel-2: #29241f;
+  --panel-3: #332d27;
+  --text: #f3e9da;
+  --text-2: #d4c8b7;
+  --muted: #a39887;
+  --border: #3a332c;
+  --border-strong: #4b4239;
+  --primary: #ff7a33;
+  --primary-2: #ff8a4d;
+  --on-primary: #1a1714;
+  --primary-soft: #3a2414;
+  --primary-text: #ff9a5c;
+  --dark: #f3e9da;
+  --dark-text: #1a1714;
+  --bubble: #3a332c;
+  --bubble-text: #f3e9da;
+  --sienna: #a9562f;
+  --ok: #86cba0;
+  --ok-soft: #1d3127;
+  --warn: #e8a54b;
+  --warn-soft: #33260f;
+  --err: #f28b76;
+  --err-soft: #3a1c16;
+  --banner-ready: linear-gradient(120deg, #143027, #1e4537);
+  --banner-running: linear-gradient(120deg, #2a2520, #3a332c);
+  --banner-attention: linear-gradient(120deg, #ff7a33, #f2620f);
+  --banner-failed: linear-gradient(120deg, #6e1f13, #8e2a1a);
+  --banner-stopped: linear-gradient(120deg, #4a3526, #5e4230);
+  --banner-text: #f3e9da;
+  --banner-attention-text: #1a1714;
+  --scrim: rgb(0 0 0 / 55%);
+  --shadow: 0 1px 2px rgb(0 0 0 / 35%);
+  --shadow-lg: 0 16px 40px rgb(0 0 0 / 55%);
   color-scheme: dark;
 }
 
@@ -108,7 +143,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font:
-    14px/1.5 Inter,
+    15px/1.5 'Familjen Grotesk',
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
@@ -192,15 +227,14 @@ h3 {
   height: 32px;
   border-radius: 9px;
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   flex: none;
 }
 
 .brand-name {
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--primary-text);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .collapse-toggle {
@@ -269,8 +303,8 @@ nav {
 }
 
 .nav-badge-alert {
-  background: var(--err);
-  color: #fff;
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .nav-running {
@@ -304,7 +338,7 @@ nav {
   margin-bottom: 8px;
   border-radius: 50%;
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .sidebar.collapsed {
@@ -347,9 +381,9 @@ nav {
 }
 
 .greeting h1 {
-  font-size: 21px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 .greeting p {
@@ -428,7 +462,7 @@ nav {
 .btn-primary {
   border-color: var(--primary);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -487,7 +521,7 @@ nav {
 .split-arrow {
   width: 34px;
   padding: 0;
-  border-left: 1px solid rgb(255 255 255 / 18%);
+  border-left: 1px solid color-mix(in srgb, var(--dark-text) 22%, transparent);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
@@ -581,7 +615,7 @@ nav {
 }
 
 .pill-needs_reply {
-  color: var(--err);
+  color: var(--primary-text);
 }
 
 .pill-failed {
@@ -610,8 +644,8 @@ nav {
   flex: none;
   padding: 18px 24px 20px;
   border-radius: var(--radius);
-  background: linear-gradient(120deg, var(--banner-from), var(--banner-to));
-  color: #fff;
+  background: var(--banner-ready);
+  color: var(--banner-text);
 }
 
 .banner-chip {
@@ -620,7 +654,7 @@ nav {
   gap: 6px;
   padding: 3px 9px;
   border-radius: 6px;
-  background: rgb(255 255 255 / 18%);
+  background: color-mix(in srgb, currentColor 16%, transparent);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -632,9 +666,9 @@ nav {
   z-index: 1;
   margin: 12px 0 4px;
   max-width: 78%;
-  font-size: 19px;
-  font-weight: 650;
-  line-height: 1.35;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.3;
 }
 
 .banner-detail {
@@ -642,7 +676,7 @@ nav {
   z-index: 1;
   margin: 0;
   max-width: 78%;
-  color: rgb(255 255 255 / 80%);
+  color: color-mix(in srgb, currentColor 82%, transparent);
 }
 
 .banner-art {
@@ -650,15 +684,26 @@ nav {
   right: 28px;
   top: 50%;
   transform: translateY(-50%) rotate(-8deg);
-  color: rgb(255 255 255 / 12%);
+  color: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+/* Charcoal: Claude is working. Orange: your turn. Red: failed. Brown: stopped. Green: ready. */
+.banner-running {
+  background: var(--banner-running);
+}
+
+.banner-needs_reply,
+.banner-needs_approval {
+  background: var(--banner-attention);
+  color: var(--banner-attention-text);
 }
 
 .banner-failed {
-  background: linear-gradient(120deg, #c23434, #9d1f1f);
+  background: var(--banner-failed);
 }
 
-.banner-needs_reply {
-  background: linear-gradient(120deg, #2f62f2, #6b3fd6);
+.banner-stopped {
+  background: var(--banner-stopped);
 }
 
 /* ---------- Sections ---------- */
@@ -736,8 +781,8 @@ nav {
   margin: 12px 0 10px auto;
   padding: 10px 14px;
   border-radius: 14px 14px 4px 14px;
-  background: var(--primary);
-  color: #fff;
+  background: var(--bubble);
+  color: var(--bubble-text);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -1052,7 +1097,7 @@ nav {
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgb(10 14 24 / 45%);
+  background: var(--scrim);
 }
 
 .dialog {
@@ -1104,8 +1149,8 @@ nav {
 }
 
 .spinner-light {
-  border-color: rgb(255 255 255 / 30%);
-  border-top-color: #fff;
+  border-color: color-mix(in srgb, currentColor 30%, transparent);
+  border-top-color: currentColor;
 }
 
 @keyframes spin {
@@ -1129,10 +1174,10 @@ nav {
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgb(36 83 230 / 50%);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent);
   }
   100% {
-    box-shadow: 0 0 0 8px rgb(36 83 230 / 0%);
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--primary) 0%, transparent);
   }
 }
 
@@ -1169,7 +1214,7 @@ nav {
     position: fixed;
     inset: 0;
     z-index: 30;
-    background: rgb(10 14 24 / 45%);
+    background: var(--scrim);
   }
 
   .header .menu-button {
@@ -1444,7 +1489,13 @@ nav {
   color: var(--ok);
 }
 
-.tag-blue {
+.tag-new {
+  background: var(--sienna);
+  color: #fff;
+  font-weight: 700;
+}
+
+.tag-accent {
   background: var(--primary-soft);
   color: var(--primary-text);
 }
@@ -1473,7 +1524,7 @@ nav {
   stroke-width: 3;
 }
 
-.badge-blue {
+.badge-partial {
   background: var(--primary-soft);
   color: var(--primary-text);
 }
@@ -1729,10 +1780,6 @@ nav {
 .tag-cancelled {
   background: var(--panel-3);
   color: var(--muted);
-}
-
-.banner-needs_approval {
-  background: linear-gradient(120deg, #2f62f2, #0e7490);
 }
 
 .pill-needs_approval {

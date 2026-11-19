@@ -56,8 +56,8 @@ const COLUMNS: Column<JobRow>[] = [
     render: (j) => (
       <span className="tags">
         {j.applied && <span className="tag tag-ok">Applied</span>}
-        {j.contacted && <span className="tag tag-blue">Contacted</span>}
-        {!j.applied && !j.contacted && <span className="muted">New</span>}
+        {j.contacted && <span className="tag tag-accent">Contacted</span>}
+        {!j.applied && !j.contacted && <span className="tag tag-new">New</span>}
       </span>
     ),
   },
@@ -127,6 +127,6 @@ function MatchBadge({ score }: { score: number | null }) {
       <Icon name="check" size={12} /> {rounded}%
     </span>
   ) : (
-    <span className="badge badge-blue">{rounded}% Match</span>
+    <span className="badge badge-partial">{rounded}% Match</span>
   );
 }

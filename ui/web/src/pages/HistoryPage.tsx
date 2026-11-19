@@ -18,7 +18,7 @@ interface Props {
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 const STATUS_TAG: Record<RunSummary['status'], string> = {
-  running: 'tag-blue',
+  running: 'tag-accent',
   success: 'tag-ok',
   error: 'tag-denied',
   interrupted: 'tag-denied',
