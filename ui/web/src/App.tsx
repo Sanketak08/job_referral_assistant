@@ -1,4 +1,4 @@
-import type { AppInfo, StoredEvent, TabId } from '@jobhunt/shared';
+import type { AppInfo, JobRef, StoredEvent, TabId } from '@jobhunt/shared';
 import { useEffect, useMemo, useState } from 'react';
 import { api, errorMessage } from './api/client.ts';
 import { Header } from './components/Header.tsx';
@@ -41,6 +41,15 @@ export function App() {
     setMenuOpen(false);
   };
 
+  const [handoffError, setHandoffError] = useState<string | null>(null);
+  const handoff = (tab: TabId, jobs: JobRef[]): void => {
+    setHandoffError(null);
+    api
+      .handoff(tab, jobs)
+      .then(() => go(tab))
+      .catch((err: unknown) => setHandoffError(errorMessage(err)));
+  };
+
   const activeTab = app?.tabs.find((tab) => tab.id === view) ?? app?.tabs[0];
 
   return (
@@ -65,13 +74,18 @@ export function App() {
           onOpenMenu={() => setMenuOpen(true)}
         />
         {loadError && <div className="alert">{loadError}</div>}
+        {handoffError && (
+          <div className="alert" role="alert" onClick={() => setHandoffError(null)}>
+            {handoffError}
+          </div>
+        )}
         {activeTab && (
           <TabView
             key={activeTab.id}
             info={activeTab}
             runs={runsByTab.get(activeTab.id) ?? []}
             sessionId={sessions[activeTab.id] ?? null}
-            results={resultsFor(activeTab.id, outputs)}
+            results={resultsFor(activeTab.id, outputs, app?.tabs ?? [], handoff)}
           />
         )}
       </main>

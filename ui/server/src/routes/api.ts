@@ -12,14 +12,15 @@ type Reply<T> = Response<T | ApiError>;
 
 apiRouter.get('/app', (_req, res: Response<AppInfo>) => {
   res.json({
-    tabs: TABS.map(({ id, label, model, presetLabel, presetPrompt, description, mcpServers }) => ({
-      id,
-      label,
-      model,
-      presetLabel,
-      presetPrompt,
-      description,
-      mcpServers: [...mcpServers],
+    tabs: TABS.map((tab) => ({
+      id: tab.id,
+      label: tab.label,
+      model: tab.model,
+      presetLabel: tab.presetLabel,
+      presetPrompt: tab.presetPrompt,
+      description: tab.description,
+      mcpServers: [...tab.mcpServers],
+      acceptsJobs: !!tab.handoffPrompt,
     })),
     userName: readFirstName(),
   });
@@ -49,10 +50,17 @@ apiRouter.post(
   (req: Request<{ tab: string }, unknown, RunRequest>, res: Reply<{ runId: number }>) => {
     const tab = tabFor(req, res, true);
     if (!tab) return;
-    const custom = req.body.prompt?.trim();
+    const { prompt, jobs } = req.body;
+    if (jobs?.length && !tab.handoffPrompt) {
+      return void res.status(400).json({ error: `${tab.label} does not take jobs` });
+    }
+    const custom = prompt?.trim();
     const runId = startRun(tab, {
-      kind: custom ? 'custom' : 'preset',
-      prompt: custom || tab.presetPrompt,
+      ...(jobs?.length && tab.handoffPrompt
+        ? { kind: 'handoff', prompt: tab.handoffPrompt(jobs) }
+        : custom
+          ? { kind: 'custom', prompt: custom }
+          : { kind: 'preset', prompt: tab.presetPrompt }),
       resumeSessionId: null,
     });
     res.status(202).json({ runId });

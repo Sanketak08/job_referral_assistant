@@ -13,6 +13,8 @@ export interface TabInfo {
   description: string;
   /** MCP servers this tab loads, for display. */
   mcpServers: string[];
+  /** Jobs from the Matches table can be sent here. */
+  acceptsJobs: boolean;
 }
 
 export interface AppInfo {
@@ -22,10 +24,11 @@ export interface AppInfo {
 }
 
 /**
- * preset: the tab's main button. custom: Run with custom input. Both start a new session.
+ * preset: the tab's main button. custom: Run with custom input. handoff: jobs sent from the
+ * Matches table. All three start a new session.
  * message: chat box, continues the current session. compact: /compact on the current session.
  */
-export type RunKind = 'preset' | 'custom' | 'message' | 'compact';
+export type RunKind = 'preset' | 'custom' | 'handoff' | 'message' | 'compact';
 
 export type RunStatus = 'success' | 'error' | 'stopped' | 'interrupted';
 
@@ -45,7 +48,14 @@ export type RunEvent =
   | { type: 'session'; sessionId: string; model: string }
   | { type: 'text'; text: string }
   | { type: 'tool_use'; toolUseId: string; name: string; summary: string; input: string }
-  | { type: 'tool_result'; toolUseId: string; content: string; isError: boolean }
+  | {
+      type: 'tool_result';
+      toolUseId: string;
+      content: string;
+      isError: boolean;
+      /** Screenshots and other images as data: URLs. Missing on runs stored before images. */
+      images?: string[];
+    }
   /** Tokens Claude currently holds in context (latest main-agent API call). */
   | { type: 'usage'; contextTokens: number }
   /** /compact finished; token counts exclude the system prompt and tool definitions. */
@@ -113,8 +123,16 @@ export interface Outputs {
 }
 
 export interface RunRequest {
-  /** Custom input. Without it the tab's preset prompt runs. */
+  /** Custom input. Without it (and without jobs) the tab's preset prompt runs. */
   prompt?: string;
+  /** Jobs handed over from the Matches table. */
+  jobs?: JobRef[];
+}
+
+export interface JobRef {
+  title: string;
+  company: string;
+  link: string;
 }
 
 export interface MessageRequest {

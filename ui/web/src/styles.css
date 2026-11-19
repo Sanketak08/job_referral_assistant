@@ -1594,3 +1594,38 @@ nav {
     padding-right: 36px;
   }
 }
+
+/* ---------- Screenshots ---------- */
+
+.shots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 4px;
+}
+
+.shots button {
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.shots img {
+  display: block;
+  max-width: min(100%, 420px);
+  max-height: 300px;
+  object-fit: contain;
+  object-position: top;
+}
+
+.shots.expanded button {
+  cursor: zoom-out;
+}
+
+.shots.expanded img {
+  max-width: 100%;
+  max-height: none;
+}

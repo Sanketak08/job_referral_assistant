@@ -1,5 +1,5 @@
 import type { RunEvent, RunFinishedEvent } from '@jobhunt/shared';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   formatCost,
   formatDuration,
@@ -71,15 +71,15 @@ function RunBlock({ run }: { run: RunView }) {
                 <Markdown text={event.text} />
               </div>
             );
-          case 'tool_use':
+          case 'tool_use': {
+            const result = results.get(event.toolUseId);
             return (
-              <ToolCall
-                key={id}
-                use={event}
-                result={results.get(event.toolUseId)}
-                running={!run.finished}
-              />
+              <div key={id}>
+                <ToolCall use={event} result={result} running={!run.finished} />
+                {!!result?.images?.length && <Screenshots images={result.images} />}
+              </div>
             );
+          }
           case 'compacted':
             return (
               <div key={id} className="note">
@@ -132,6 +132,7 @@ function RunPrompt({ run }: { run: RunView }) {
   return (
     <div className="msg-user">
       {run.kind === 'custom' && <span className="msg-label">Custom run</span>}
+      {run.kind === 'handoff' && <span className="msg-label">Sent from Matches</span>}
       {run.prompt}
     </div>
   );
@@ -159,6 +160,25 @@ function ToolCall({
       <pre>{use.input}</pre>
       {result && <pre className="tool-result">{result.content || '(no output)'}</pre>}
     </details>
+  );
+}
+
+/** Screenshots stay visible outside the collapsed tool row, so a form can be reviewed at once. */
+function Screenshots({ images }: { images: string[] }) {
+  // Browsers block opening data: URLs in a new tab, so tapping enlarges the image in place.
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className={expanded ? 'shots expanded' : 'shots'}>
+      {images.map((src, i) => (
+        <button
+          key={i}
+          onClick={() => setExpanded((e) => !e)}
+          title={expanded ? 'Shrink' : 'Show full size'}
+        >
+          <img src={src} alt={`Screenshot ${i + 1}`} loading="lazy" />
+        </button>
+      ))}
+    </div>
   );
 }
 

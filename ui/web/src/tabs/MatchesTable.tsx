@@ -1,6 +1,6 @@
 import type { JobRow } from '@jobhunt/shared';
 import { useState, type ReactNode } from 'react';
-import { DataTable, type Column } from '../components/DataTable.tsx';
+import { DataTable, type Column, type RowAction } from '../components/DataTable.tsx';
 import { Icon } from '../components/Icon.tsx';
 import { postedAgo } from './dates.ts';
 
@@ -9,6 +9,8 @@ interface Props {
   jobsFile: string | null;
   /** Buttons shown when rows are selected; gets the selected jobs and a reset callback. */
   selectionActions?: (jobs: JobRow[], clear: () => void) => ReactNode;
+  /** Extra entries for a row's "⋯" menu. */
+  rowActions?: (job: JobRow) => RowAction[];
 }
 
 /** Score at or above which a match is shown in green, like a strong match. */
@@ -61,7 +63,7 @@ const COLUMNS: Column<JobRow>[] = [
   },
 ];
 
-export function MatchesTable({ jobs, jobsFile, selectionActions }: Props) {
+export function MatchesTable({ jobs, jobsFile, selectionActions, rowActions }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [hideApplied, setHideApplied] = useState(false);
 
@@ -110,6 +112,7 @@ export function MatchesTable({ jobs, jobsFile, selectionActions }: Props) {
         onSelectedChange={setSelected}
         rowActions={(j) => [
           { label: 'Open posting', icon: 'external', onClick: () => window.open(j.link, '_blank') },
+          ...(rowActions?.(j) ?? []),
         ]}
       />
     </div>

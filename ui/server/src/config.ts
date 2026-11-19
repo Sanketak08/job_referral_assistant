@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { TabId } from '@jobhunt/shared';
+import type { JobRef, TabId } from '@jobhunt/shared';
 
 const serverSrc = path.dirname(fileURLToPath(import.meta.url));
 
@@ -28,6 +28,8 @@ export const IS_DEV = process.env.NODE_ENV !== 'production';
 export const HISTORY_RUNS_PER_TAB = 20;
 /** Tool inputs and results longer than this are cut before they are stored and shown. */
 export const MAX_TOOL_TEXT = 4000;
+/** Images in tool results larger than this (base64 characters, about 3 MB) are not stored. */
+export const MAX_IMAGE_CHARS = 4_000_000;
 
 /**
  * Every MCP server this Claude Code install can load, as the name used in tool ids
@@ -65,7 +67,12 @@ export interface TabPreset {
   presetPrompt: string;
   description: string;
   mcpServers: readonly McpServer[];
+  /** Builds the prompt when jobs are sent here from the Matches table. */
+  handoffPrompt?: (jobs: JobRef[]) => string;
 }
+
+const jobList = (jobs: JobRef[]): string =>
+  jobs.map((j, i) => `${i + 1}. ${j.title} | ${j.company} | ${j.link}`).join('\n');
 
 // Preset prompts use the slash form so they resolve to the repo skill, not the older
 // anthropic-skills: copy on the account.
@@ -79,6 +86,32 @@ export const TABS: readonly TabPreset[] = [
     description: 'Finds jobs posted in the last 24 hours and ranks them against your profile.',
     // Indeed (Tier 3b), JobSpy (Tier 4), and Tavily/Playwright/Apify for direct-form resolution.
     mcpServers: ['claude_ai_Indeed', 'jobspy', 'tavily', 'playwright', 'apify'],
+  },
+  {
+    id: 'apply',
+    label: 'Apply',
+    model: 'sonnet',
+    presetLabel: 'Apply to top matches',
+    presetPrompt: '/job-application-phase',
+    description:
+      'Fills each application form from your profile and waits for your OK before submitting.',
+    // Playwright fills the forms; Tavily finds the company's own page for aggregator links.
+    mcpServers: ['playwright', 'tavily'],
+    handoffPrompt: (jobs) =>
+      `/job-application-phase Apply only to these jobs from the latest daily_jobs CSV, in this order:\n${jobList(jobs)}`,
+  },
+  {
+    id: 'referral',
+    label: 'Referral',
+    model: 'sonnet',
+    presetLabel: 'Find referrals',
+    presetPrompt: '/job-referral-phase',
+    description:
+      'Checks visa and relocation, finds engineers at the company and drafts emails for your approval.',
+    // No Playwright: Apply uses it, and both tabs would fight over the same browser profile.
+    mcpServers: ['gmail', 'tavily'],
+    handoffPrompt: (jobs) =>
+      `/job-referral-phase Find referral contacts for these jobs, one company at a time:\n${jobList(jobs)}`,
   },
 ];
 

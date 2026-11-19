@@ -1,5 +1,5 @@
 import type { RunEvent } from '@jobhunt/shared';
-import { MAX_TOOL_TEXT } from '../config.ts';
+import { MAX_IMAGE_CHARS, MAX_TOOL_TEXT } from '../config.ts';
 
 // The subset of Claude Code's stream-json lines that the UI uses. Every field is optional
 // because the format belongs to the CLI and can gain or drop fields between versions.
@@ -27,6 +27,7 @@ interface ContentBlock {
   tool_use_id?: string;
   content?: string | ContentBlock[];
   is_error?: boolean;
+  source?: { type?: string; media_type?: string; data?: string };
 }
 
 interface Usage {
@@ -131,8 +132,21 @@ function toolResultBlock(block: ContentBlock): RunEvent[] {
       toolUseId: block.tool_use_id,
       content: truncate(resultText(block.content)),
       isError: block.is_error === true,
+      images: resultImages(block.content),
     },
   ];
+}
+
+/** Screenshots (e.g. Playwright's browser_take_screenshot) as data: URLs, so the UI can show
+ *  the filled form for approval. Oversized images are skipped to keep the database small. */
+function resultImages(content: ContentBlock['content']): string[] {
+  if (!Array.isArray(content)) return [];
+  return content.flatMap((part) => {
+    const { source } = part;
+    if (part.type !== 'image' || source?.type !== 'base64' || !source.data) return [];
+    if (source.data.length > MAX_IMAGE_CHARS) return [];
+    return [`data:${source.media_type ?? 'image/png'};base64,${source.data}`];
+  });
 }
 
 function resultText(content: ContentBlock['content']): string {
