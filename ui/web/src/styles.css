@@ -1,46 +1,55 @@
 /* ---------- Tokens ---------- */
-/* Warm cream, charcoal and orange, after the Greenhouse job board the user liked; colours carry
-   meaning (see comments) rather than decoration. Dark mode keeps the same warm hues. */
+/* Forest green on warm paper. Every colour has one job:
+   green = brand, actions, success · terracotta = your turn · brass = new · wine = failed.
+   Text pairs are checked for WCAG AA in both themes. */
 
 :root {
-  --bg: #fff5e3;
-  --panel: #fffaf2;
-  --panel-2: #fdf1dd;
-  --panel-3: #f6e7ce;
-  --text: #2d2a27;
-  --text-2: #4b463f;
-  --muted: #766d62;
-  --border: #ebddc5;
-  --border-strong: #dccaad;
-  /* Orange means "act": primary actions and anything waiting for you. */
-  --primary: #ff7023;
-  --primary-2: #f2620f;
-  --on-primary: #2d2a27;
-  --primary-soft: #ffe6d3;
-  --primary-text: #b4470f;
-  --dark: #2d2a27;
-  --dark-text: #fff5e3;
-  --bubble: #2d2a27;
-  --bubble-text: #fff5e3;
-  /* Sienna marks new items, like the "New" tags on the job board. */
-  --sienna: #a9562f;
-  /* Forest green means "good": ready, complete, strong match. */
-  --ok: #2e6a4e;
-  --ok-soft: #e2eee4;
-  --warn: #9a5a0e;
-  --warn-soft: #fbebd1;
-  --err: #b42318;
-  --err-soft: #fde8e3;
-  --banner-ready: linear-gradient(120deg, #15372c, #2c5545);
-  --banner-running: linear-gradient(120deg, #2d2a27, #4a4038);
-  --banner-attention: linear-gradient(120deg, #ff7023, #ff9248);
-  --banner-failed: linear-gradient(120deg, #8e2a1a, #6e1f13);
-  --banner-stopped: linear-gradient(120deg, #5e4230, #7a5639);
-  --banner-text: #fff5e3;
-  --banner-attention-text: #2d2a27;
-  --scrim: rgb(45 42 39 / 45%);
-  --shadow: 0 1px 2px rgb(45 42 39 / 6%), 0 1px 3px rgb(45 42 39 / 8%);
-  --shadow-lg: 0 14px 34px rgb(45 42 39 / 18%);
+  /* Paper and ink: a cool cream (green looks sickly on yellow cream) and green-tinted charcoal. */
+  --bg: #f4f1e8;
+  --panel: #fbf9f3;
+  --panel-2: #f2eee3;
+  --panel-3: #e9e4d6;
+  --text: #1f2b26;
+  --text-2: #43504a;
+  --muted: #66706a;
+  --border: #e2dccb;
+  --border-strong: #d3cbb6;
+  /* Brand, forest green: actions, the current place, and everything that went well. */
+  --primary: #3a7d60;
+  --primary-2: #2f6b52;
+  --on-primary: #fbf9f3;
+  --primary-soft: #e2ede6;
+  --primary-text: #2a6049;
+  --ok: #2a6049;
+  --ok-soft: #e2ede6;
+  /* Terracotta: your turn (a reply or an approval is waiting). Never used for errors. */
+  --attn: #a9532e;
+  --attn-soft: #f6e3d8;
+  --attn-text: #9a4a27;
+  --on-attn: #fbf9f3;
+  /* Brass: new and not yet handled, like a fresh job in the list. */
+  --brass: #b58a4f;
+  --on-brass: #1f2b26;
+  --brass-soft: #f2e8d6;
+  --brass-text: #7a5a2b;
+  /* Wine: failed. A different hue from terracotta so the two are never confused. */
+  --err: #a3283b;
+  --err-soft: #f8e4e6;
+  --warn: #7a5a2b;
+  --warn-soft: #f2e8d6;
+  --dark: #1f2b26;
+  --dark-text: #fbf9f3;
+  --bubble: #1f2b26;
+  --bubble-text: #fbf9f3;
+  --banner-ready: linear-gradient(120deg, #1f4a3a, #3a7d60);
+  --banner-running: linear-gradient(120deg, #1f2b26, #34413a);
+  --banner-attention: linear-gradient(120deg, #a9532e, #c0693f);
+  --banner-failed: linear-gradient(120deg, #7e2738, #9a3346);
+  --banner-stopped: linear-gradient(120deg, #4f4a3c, #6a6350);
+  --banner-text: #fbf9f3;
+  --scrim: rgb(31 43 38 / 45%);
+  --shadow: 0 1px 2px rgb(31 43 38 / 6%), 0 1px 3px rgb(31 43 38 / 8%);
+  --shadow-lg: 0 14px 34px rgb(31 43 38 / 18%);
   --radius: 10px;
   --radius-sm: 6px;
   color-scheme: light;
@@ -48,38 +57,44 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #1a1714;
-    --panel: #221e1a;
-    --panel-2: #29241f;
-    --panel-3: #332d27;
-    --text: #f3e9da;
-    --text-2: #d4c8b7;
-    --muted: #a39887;
-    --border: #3a332c;
-    --border-strong: #4b4239;
-    --primary: #ff7a33;
-    --primary-2: #ff8a4d;
-    --on-primary: #1a1714;
-    --primary-soft: #3a2414;
-    --primary-text: #ff9a5c;
-    --dark: #f3e9da;
-    --dark-text: #1a1714;
-    --bubble: #3a332c;
-    --bubble-text: #f3e9da;
-    --sienna: #a9562f;
-    --ok: #86cba0;
-    --ok-soft: #1d3127;
-    --warn: #e8a54b;
-    --warn-soft: #33260f;
-    --err: #f28b76;
-    --err-soft: #3a1c16;
-    --banner-ready: linear-gradient(120deg, #143027, #1e4537);
-    --banner-running: linear-gradient(120deg, #2a2520, #3a332c);
-    --banner-attention: linear-gradient(120deg, #ff7a33, #f2620f);
-    --banner-failed: linear-gradient(120deg, #6e1f13, #8e2a1a);
-    --banner-stopped: linear-gradient(120deg, #4a3526, #5e4230);
-    --banner-text: #f3e9da;
-    --banner-attention-text: #1a1714;
+    --bg: #0f1513;
+    --panel: #151d1a;
+    --panel-2: #1b2521;
+    --panel-3: #22302a;
+    --text: #e8eae2;
+    --text-2: #c5ccc4;
+    --muted: #97a39c;
+    --border: #26332d;
+    --border-strong: #33433b;
+    --primary: #6dba92;
+    --primary-2: #82c9a3;
+    --on-primary: #0f1513;
+    --primary-soft: #1b3127;
+    --primary-text: #8ed0ac;
+    --ok: #8ed0ac;
+    --ok-soft: #1b3127;
+    --attn: #e0895b;
+    --attn-soft: #3a2318;
+    --attn-text: #e0895b;
+    --on-attn: #0f1513;
+    --brass: #d4a866;
+    --on-brass: #0f1513;
+    --brass-soft: #33291a;
+    --brass-text: #d4a866;
+    --err: #f08a97;
+    --err-soft: #3a1820;
+    --warn: #d4a866;
+    --warn-soft: #33291a;
+    --dark: #ece8dc;
+    --dark-text: #0f1513;
+    --bubble: #22302a;
+    --bubble-text: #e8eae2;
+    --banner-ready: linear-gradient(120deg, #17382b, #245640);
+    --banner-running: linear-gradient(120deg, #26352e, #3b4c43);
+    --banner-attention: linear-gradient(120deg, #9c4b27, #b05a32);
+    --banner-failed: linear-gradient(120deg, #6e2231, #85293b);
+    --banner-stopped: linear-gradient(120deg, #3c3a30, #4f4b3e);
+    --banner-text: #ece8dc;
     --scrim: rgb(0 0 0 / 55%);
     --shadow: 0 1px 2px rgb(0 0 0 / 35%);
     --shadow-lg: 0 16px 40px rgb(0 0 0 / 55%);
@@ -88,38 +103,44 @@
 }
 
 :root[data-theme='dark'] {
-  --bg: #1a1714;
-  --panel: #221e1a;
-  --panel-2: #29241f;
-  --panel-3: #332d27;
-  --text: #f3e9da;
-  --text-2: #d4c8b7;
-  --muted: #a39887;
-  --border: #3a332c;
-  --border-strong: #4b4239;
-  --primary: #ff7a33;
-  --primary-2: #ff8a4d;
-  --on-primary: #1a1714;
-  --primary-soft: #3a2414;
-  --primary-text: #ff9a5c;
-  --dark: #f3e9da;
-  --dark-text: #1a1714;
-  --bubble: #3a332c;
-  --bubble-text: #f3e9da;
-  --sienna: #a9562f;
-  --ok: #86cba0;
-  --ok-soft: #1d3127;
-  --warn: #e8a54b;
-  --warn-soft: #33260f;
-  --err: #f28b76;
-  --err-soft: #3a1c16;
-  --banner-ready: linear-gradient(120deg, #143027, #1e4537);
-  --banner-running: linear-gradient(120deg, #2a2520, #3a332c);
-  --banner-attention: linear-gradient(120deg, #ff7a33, #f2620f);
-  --banner-failed: linear-gradient(120deg, #6e1f13, #8e2a1a);
-  --banner-stopped: linear-gradient(120deg, #4a3526, #5e4230);
-  --banner-text: #f3e9da;
-  --banner-attention-text: #1a1714;
+  --bg: #0f1513;
+  --panel: #151d1a;
+  --panel-2: #1b2521;
+  --panel-3: #22302a;
+  --text: #e8eae2;
+  --text-2: #c5ccc4;
+  --muted: #97a39c;
+  --border: #26332d;
+  --border-strong: #33433b;
+  --primary: #6dba92;
+  --primary-2: #82c9a3;
+  --on-primary: #0f1513;
+  --primary-soft: #1b3127;
+  --primary-text: #8ed0ac;
+  --ok: #8ed0ac;
+  --ok-soft: #1b3127;
+  --attn: #e0895b;
+  --attn-soft: #3a2318;
+  --attn-text: #e0895b;
+  --on-attn: #0f1513;
+  --brass: #d4a866;
+  --on-brass: #0f1513;
+  --brass-soft: #33291a;
+  --brass-text: #d4a866;
+  --err: #f08a97;
+  --err-soft: #3a1820;
+  --warn: #d4a866;
+  --warn-soft: #33291a;
+  --dark: #ece8dc;
+  --dark-text: #0f1513;
+  --bubble: #22302a;
+  --bubble-text: #e8eae2;
+  --banner-ready: linear-gradient(120deg, #17382b, #245640);
+  --banner-running: linear-gradient(120deg, #26352e, #3b4c43);
+  --banner-attention: linear-gradient(120deg, #9c4b27, #b05a32);
+  --banner-failed: linear-gradient(120deg, #6e2231, #85293b);
+  --banner-stopped: linear-gradient(120deg, #3c3a30, #4f4b3e);
+  --banner-text: #ece8dc;
   --scrim: rgb(0 0 0 / 55%);
   --shadow: 0 1px 2px rgb(0 0 0 / 35%);
   --shadow-lg: 0 16px 40px rgb(0 0 0 / 55%);
@@ -303,8 +324,8 @@ nav {
 }
 
 .nav-badge-alert {
-  background: var(--primary);
-  color: var(--on-primary);
+  background: var(--attn);
+  color: var(--on-attn);
 }
 
 .nav-running {
@@ -615,7 +636,7 @@ nav {
 }
 
 .pill-needs_reply {
-  color: var(--primary-text);
+  color: var(--attn-text);
 }
 
 .pill-failed {
@@ -687,7 +708,7 @@ nav {
   color: color-mix(in srgb, currentColor 14%, transparent);
 }
 
-/* Charcoal: Claude is working. Orange: your turn. Red: failed. Brown: stopped. Green: ready. */
+/* Green: ready or done. Charcoal: Claude is working. Terracotta: your turn. Wine: failed. */
 .banner-running {
   background: var(--banner-running);
 }
@@ -695,7 +716,6 @@ nav {
 .banner-needs_reply,
 .banner-needs_approval {
   background: var(--banner-attention);
-  color: var(--banner-attention-text);
 }
 
 .banner-failed {
@@ -1490,14 +1510,14 @@ nav {
 }
 
 .tag-new {
-  background: var(--sienna);
-  color: #fff;
+  background: var(--brass);
+  color: var(--on-brass);
   font-weight: 700;
 }
 
 .tag-accent {
-  background: var(--primary-soft);
-  color: var(--primary-text);
+  background: var(--brass-soft);
+  color: var(--brass-text);
 }
 
 .badge {
@@ -1525,8 +1545,8 @@ nav {
 }
 
 .badge-partial {
-  background: var(--primary-soft);
-  color: var(--primary-text);
+  background: var(--brass-soft);
+  color: var(--brass-text);
 }
 
 .row-menu-button {
@@ -1702,15 +1722,15 @@ nav {
   margin: 10px 0;
   padding: 14px 16px;
   border: 1px solid var(--border-strong);
-  border-left: 4px solid var(--primary);
+  border-left: 4px solid var(--attn);
   border-radius: var(--radius-sm);
   background: var(--panel);
   box-shadow: var(--shadow);
 }
 
 .approval-pending {
-  border-color: var(--primary);
-  background: var(--primary-soft);
+  border-color: var(--attn);
+  background: var(--attn-soft);
 }
 
 .approval-denied,
@@ -1731,7 +1751,7 @@ nav {
 }
 
 .approval-head .icon {
-  color: var(--primary-text);
+  color: var(--attn-text);
 }
 
 .approval-fields {
@@ -1783,7 +1803,7 @@ nav {
 }
 
 .pill-needs_approval {
-  color: var(--primary-text);
+  color: var(--attn-text);
 }
 
 @media (max-width: 640px) {
