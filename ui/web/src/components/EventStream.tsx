@@ -1,4 +1,4 @@
-import type { RunEvent, RunFinishedEvent } from '@jobhunt/shared';
+import type { ApprovalOutcome, RunEvent, RunFinishedEvent } from '@jobhunt/shared';
 import { useEffect, useRef, useState } from 'react';
 import {
   formatCost,
@@ -6,6 +6,7 @@ import {
   formatTime,
   formatTokens,
   toolLabel,
+  type PermissionRequest,
   type RunView,
 } from '../tabs/runs.ts';
 import { Icon } from './Icon.tsx';
@@ -17,7 +18,16 @@ type ToolResult = Extract<RunEvent, { type: 'tool_result' }>;
 /** Distance from the bottom (px) within which new output keeps the view pinned to the end. */
 const STICKY_SCROLL_PX = 120;
 
-export function EventStream({ runs, emptyText }: { runs: RunView[]; emptyText: string }) {
+/** Answers a permission request; rejects with the reason if the server refused. */
+export type DecideApproval = (requestId: string, allow: boolean) => Promise<unknown>;
+
+interface Props {
+  runs: RunView[];
+  emptyText: string;
+  onDecide: DecideApproval;
+}
+
+export function EventStream({ runs, emptyText, onDecide }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   // Follow new output only while the user is at the bottom, so reading older output is not
   // interrupted.
@@ -43,13 +53,13 @@ export function EventStream({ runs, emptyText }: { runs: RunView[]; emptyText: s
         </div>
       )}
       {runs.map((run) => (
-        <RunBlock key={run.runId} run={run} />
+        <RunBlock key={run.runId} run={run} onDecide={onDecide} />
       ))}
     </div>
   );
 }
 
-function RunBlock({ run }: { run: RunView }) {
+function RunBlock({ run, onDecide }: { run: RunView; onDecide: DecideApproval }) {
   const results = new Map<string, ToolResult>();
   for (const { event } of run.events) {
     if (event.type === 'tool_result') results.set(event.toolUseId, event);
@@ -80,6 +90,15 @@ function RunBlock({ run }: { run: RunView }) {
               </div>
             );
           }
+          case 'permission_request':
+            return (
+              <ApprovalCard
+                key={id}
+                request={event}
+                outcome={run.approvals.get(event.requestId) ?? null}
+                onDecide={onDecide}
+              />
+            );
           case 'compacted':
             return (
               <div key={id} className="note">
@@ -215,4 +234,70 @@ function RunFooter({
       )}
     </footer>
   );
+}
+
+const OUTCOME_LABEL: Record<ApprovalOutcome, string> = {
+  allowed: 'Allowed',
+  denied: 'Denied',
+  cancelled: 'Expired',
+};
+
+function ApprovalCard({
+  request,
+  outcome,
+  onDecide,
+}: {
+  request: PermissionRequest;
+  outcome: ApprovalOutcome | null;
+  onDecide: DecideApproval;
+}) {
+  const [sending, setSending] = useState(false);
+  const decide = (allow: boolean) => () => {
+    setSending(true);
+    onDecide(request.requestId, allow).catch(() => setSending(false));
+  };
+
+  return (
+    <div className={`approval approval-${outcome ?? 'pending'}`}>
+      <div className="approval-head">
+        <Icon name="shield" size={16} />
+        <strong>Claude wants to use {toolLabel(request.toolName)}</strong>
+        {outcome && <span className={`tag tag-${outcome}`}>{OUTCOME_LABEL[outcome]}</span>}
+      </div>
+      <dl className="approval-fields">
+        {inputFields(request.input).map(([key, value]) => (
+          <div key={key}>
+            <dt>{key}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+      {outcome === null && (
+        <div className="approval-actions">
+          <button className="btn btn-sm" disabled={sending} onClick={decide(false)}>
+            <Icon name="x" size={14} /> Deny
+          </button>
+          <button className="btn btn-sm btn-primary" disabled={sending} onClick={decide(true)}>
+            <Icon name="check" size={14} /> Allow
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** The tool input as label/value pairs, e.g. to_email, subject, body for an email. */
+function inputFields(input: string): [string, string][] {
+  try {
+    const value: unknown = JSON.parse(input);
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return Object.entries(value).map(([k, v]) => [
+        k.replace(/_/g, ' '),
+        typeof v === 'string' ? v : JSON.stringify(v, null, 2),
+      ]);
+    }
+  } catch {
+    // Truncated or not JSON: show it as is.
+  }
+  return [['input', input]];
 }

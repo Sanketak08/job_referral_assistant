@@ -1,4 +1,12 @@
-import type { RunFinishedEvent, RunKind, StoredEvent } from '@jobhunt/shared';
+import type {
+  ApprovalOutcome,
+  RunEvent,
+  RunFinishedEvent,
+  RunKind,
+  StoredEvent,
+} from '@jobhunt/shared';
+
+export type PermissionRequest = Extract<RunEvent, { type: 'permission_request' }>;
 
 export interface RunView {
   runId: number;
@@ -14,6 +22,10 @@ export interface RunView {
   /** Latest text or tool call, for status lines. */
   lastActivity: string | null;
   lastText: string | null;
+  /** Outcome per permission request id; null while it waits for a click. */
+  approvals: Map<string, ApprovalOutcome | null>;
+  /** The oldest request still waiting, if any. */
+  pendingApproval: PermissionRequest | null;
 }
 
 /** Groups a tab's flat event list into runs, oldest first. */
@@ -34,6 +46,8 @@ export function groupRuns(events: StoredEvent[]): RunView[] {
         contextTokens: null,
         lastActivity: null,
         lastText: null,
+        approvals: new Map(),
+        pendingApproval: null,
       };
       runs.set(stored.runId, run);
     }
@@ -58,21 +72,41 @@ export function groupRuns(events: StoredEvent[]): RunView[] {
       case 'tool_use':
         run.lastActivity = `${toolLabel(event.name)}${event.summary ? ` · ${event.summary}` : ''}`;
         break;
+      case 'permission_request':
+        run.approvals.set(event.requestId, null);
+        break;
+      case 'permission_decided':
+        run.approvals.set(event.requestId, event.outcome);
+        break;
       case 'run_finished':
         run.finished = event;
         break;
     }
     run.events.push(stored);
   }
+  for (const run of runs.values()) run.pendingApproval = oldestPending(run);
   return [...runs.values()];
 }
 
-export type TabStatus = 'idle' | 'running' | 'needs_reply' | 'done' | 'failed' | 'stopped';
+function oldestPending(run: RunView): PermissionRequest | null {
+  for (const { event } of run.events) {
+    if (event.type === 'permission_request' && run.approvals.get(event.requestId) === null) {
+      return event;
+    }
+  }
+  return null;
+}
+
+export type TabStatus =
+  'idle' | 'running' | 'needs_approval' | 'needs_reply' | 'done' | 'failed' | 'stopped';
+
+/** Statuses that wait for the user; shown as an alert badge in the sidebar. */
+export const WAITING: readonly TabStatus[] = ['needs_approval', 'needs_reply'];
 
 export function tabStatus(latest: RunView | undefined): TabStatus {
   if (!latest) return 'idle';
   const { finished } = latest;
-  if (!finished) return 'running';
+  if (!finished) return latest.pendingApproval ? 'needs_approval' : 'running';
   if (finished.status === 'stopped') return 'stopped';
   if (finished.status !== 'success') return 'failed';
   return latest.kind !== 'compact' && asksQuestion(latest.lastText) ? 'needs_reply' : 'done';

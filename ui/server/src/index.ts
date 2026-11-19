@@ -4,6 +4,7 @@ import express from 'express';
 import { HISTORY_RUNS_PER_TAB, HOST, IS_DEV, PORT, TABS, WEB_ROOT } from './config.ts';
 import { watchOutputs } from './files/outputs.ts';
 import { attachLive, broadcast } from './live.ts';
+import { mcpRouter } from './mcp/permissionServer.ts';
 import { apiRouter } from './routes/api.ts';
 import { closeInterruptedRuns, getTabSession, recentEvents } from './store/db.ts';
 
@@ -16,8 +17,10 @@ if (process.env.ANTHROPIC_API_KEY) {
 closeInterruptedRuns();
 
 const app = express();
-app.use(express.json());
+// Approval requests carry the tool's full input (e.g. a file Claude wants to write).
+app.use(express.json({ limit: '5mb' }));
 app.use('/api', apiRouter);
+app.use('/mcp', mcpRouter);
 
 const server = http.createServer(app);
 attachLive(server, () => ({

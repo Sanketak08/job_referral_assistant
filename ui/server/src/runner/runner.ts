@@ -1,8 +1,10 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import readline from 'node:readline';
-import type { RunEvent, RunFinishedEvent, RunKind, TabId } from '@jobhunt/shared';
-import { CLAUDE_BIN, REPO_ROOT, type TabPreset } from '../config.ts';
+import type { RunFinishedEvent, RunKind, TabId } from '@jobhunt/shared';
+import { APPROVAL_TIMEOUT_MS, CLAUDE_BIN, REPO_ROOT, type TabPreset } from '../config.ts';
+import { recordEvent as record } from '../events.ts';
 import { broadcast } from '../live.ts';
+import { cancelApprovals } from '../mcp/approvals.ts';
 import { createParser } from '../parser/parse.ts';
 import * as store from '../store/db.ts';
 import { buildArgs } from './args.ts';
@@ -40,7 +42,7 @@ export function startRun(tab: TabPreset, { kind, prompt, resumeSessionId }: RunO
   const runId = store.createRun(tab.id, kind, prompt);
   record(runId, tab.id, { type: 'run_started', prompt, kind, resumedSessionId: resumeSessionId });
 
-  const child = spawn(CLAUDE_BIN, buildArgs(tab, resumeSessionId), {
+  const child = spawn(CLAUDE_BIN, buildArgs(tab, runId, resumeSessionId), {
     cwd: REPO_ROOT,
     env: claudeEnv(),
   });
@@ -108,6 +110,7 @@ export function setTabSession(tab: TabId, sessionId: string | null): void {
 function finish(run: ActiveRun, exitCode: number | null): void {
   if (active.get(run.tab) !== run) return;
   active.delete(run.tab);
+  cancelApprovals(run.runId);
 
   const event: RunFinishedEvent = run.stopRequested
     ? { ...emptyResult(), ...run.result, status: 'stopped' }
@@ -132,13 +135,9 @@ function emptyResult(): RunFinishedEvent {
   };
 }
 
-function record(runId: number, tab: TabId, event: RunEvent): void {
-  broadcast({ type: 'event', event: store.addEvent(runId, tab, event) });
-}
-
-/** With ANTHROPIC_API_KEY set, Claude Code bills the API instead of the Max plan. */
 function claudeEnv(): NodeJS.ProcessEnv {
-  const env = { ...process.env };
+  // With ANTHROPIC_API_KEY set, Claude Code bills the API instead of the Max plan.
+  const env: NodeJS.ProcessEnv = { ...process.env, MCP_TOOL_TIMEOUT: String(APPROVAL_TIMEOUT_MS) };
   delete env.ANTHROPIC_API_KEY;
   return env;
 }

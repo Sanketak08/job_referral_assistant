@@ -67,6 +67,8 @@ export interface TabPreset {
   presetPrompt: string;
   description: string;
   mcpServers: readonly McpServer[];
+  /** Tools that always need an Approve click in the UI, even though settings allow them. */
+  askTools?: readonly string[];
   /** Builds the prompt when jobs are sent here from the Matches table. */
   handoffPrompt?: (jobs: JobRef[]) => string;
 }
@@ -110,10 +112,18 @@ export const TABS: readonly TabPreset[] = [
       'Checks visa and relocation, finds engineers at the company and drafts emails for your approval.',
     // No Playwright: Apply uses it, and both tabs would fight over the same browser profile.
     mcpServers: ['gmail', 'tavily'],
+    // Every email waits for an Approve click showing recipient, subject and body.
+    askTools: ['mcp__gmail__send_email_with_attachment'],
     handoffPrompt: (jobs) =>
       `/job-referral-phase Find referral contacts for these jobs, one company at a time:\n${jobList(jobs)}`,
   },
 ];
+
+/**
+ * How long Claude Code waits for an MCP tool, here the approval tool (ms). The default is far
+ * too short for approving from a phone later; progress notifications keep the call alive.
+ */
+export const APPROVAL_TIMEOUT_MS = 24 * 60 * 60 * 1000;
 
 /** Prompt that asks Claude to compact the session it is resumed into. */
 export const COMPACT_PROMPT = '/compact';

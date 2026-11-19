@@ -6,6 +6,7 @@ import {
   formatCost,
   formatDuration,
   formatTokens,
+  toolLabel,
   type RunView,
   type TabStatus,
 } from './runs.ts';
@@ -20,6 +21,7 @@ interface Props {
 /** The big blue status card at the top of a tab. */
 export function Banner({ info, status, latest }: Props) {
   const now = useNow(status === 'running');
+  const art = status === 'needs_approval' ? 'shield' : TAB_ICONS[info.id];
   const { chip, title, detail } = describe(info, status, latest, now);
 
   return (
@@ -35,7 +37,7 @@ export function Banner({ info, status, latest }: Props) {
       <h2 className="banner-title">{title}</h2>
       {detail && <p className="banner-detail">{detail}</p>}
       <span className="banner-art" aria-hidden="true">
-        <Icon name={TAB_ICONS[info.id]} size={150} />
+        <Icon name={art} size={150} />
       </span>
     </div>
   );
@@ -72,6 +74,14 @@ function describe(
           .filter(Boolean)
           .join(' · '),
       };
+    case 'needs_approval': {
+      const request = latest?.pendingApproval;
+      return {
+        chip: 'Needs your approval',
+        title: `Allow ${request ? toolLabel(request.toolName) : 'a tool'}?`,
+        detail: 'Claude is paused until you choose Allow or Deny below.',
+      };
+    }
     case 'needs_reply':
       return {
         chip: 'Needs your reply',

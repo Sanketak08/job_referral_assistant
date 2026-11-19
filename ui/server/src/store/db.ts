@@ -103,6 +103,12 @@ function toStoredEvent(row: EventRow): StoredEvent {
   };
 }
 
+export function findRunTab(runId: number): TabId | null {
+  const row = db.prepare('SELECT tab FROM runs WHERE id = ?').get(runId) as
+    { tab: TabId } | undefined;
+  return row?.tab ?? null;
+}
+
 export function getTabSession(tab: TabId): string | null {
   const row = db.prepare('SELECT session_id FROM tab_sessions WHERE tab = ?').get(tab) as
     { session_id: string | null } | undefined;

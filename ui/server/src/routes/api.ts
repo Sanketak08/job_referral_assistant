@@ -1,8 +1,16 @@
-import type { ApiError, AppInfo, MessageRequest, Outputs, RunRequest } from '@jobhunt/shared';
+import type {
+  ApiError,
+  AppInfo,
+  ApprovalRequest,
+  MessageRequest,
+  Outputs,
+  RunRequest,
+} from '@jobhunt/shared';
 import { Router, type Request, type Response } from 'express';
 import { COMPACT_PROMPT, findTab, TABS, type TabPreset } from '../config.ts';
 import { readOutputs } from '../files/outputs.ts';
 import { readFirstName } from '../files/profile.ts';
+import { decide } from '../mcp/approvals.ts';
 import { isRunning, setTabSession, startRun, stopRun } from '../runner/runner.ts';
 import { getTabSession } from '../store/db.ts';
 
@@ -117,5 +125,17 @@ apiRouter.post(
     const tab = tabFor(req, res, false);
     if (!tab) return;
     res.json({ stopped: stopRun(tab.id) });
+  },
+);
+
+apiRouter.post(
+  '/approvals/:id',
+  (req: Request<{ id: string }, unknown, ApprovalRequest>, res: Reply<{ ok: true }>) => {
+    const done = decide(req.params.id, req.body.allow ? 'allowed' : 'denied');
+    if (!done)
+      return void res
+        .status(404)
+        .json({ error: 'This request was already answered or has expired' });
+    res.json({ ok: true });
   },
 );

@@ -1,6 +1,5 @@
 import type { TabId, TabInfo } from '@jobhunt/shared';
-import type { TabStatus } from '../tabs/runs.ts';
-import { formatCost } from '../tabs/runs.ts';
+import { formatCost, WAITING, type TabStatus } from '../tabs/runs.ts';
 import { TAB_ICONS } from '../tabs/tabIcons.ts';
 import { Icon, type IconName } from './Icon.tsx';
 
@@ -89,12 +88,12 @@ function NavItem({
       <Icon name={icon} />
       <span className="nav-text">{label}</span>
       {status === 'running' && <span className="nav-running" title="Running" />}
-      {status === 'needs_reply' && (
-        <span className="nav-badge nav-badge-alert" title="Waiting for your reply">
+      {status && WAITING.includes(status) && (
+        <span className="nav-badge nav-badge-alert" title="Waiting for you">
           !
         </span>
       )}
-      {status !== 'running' && status !== 'needs_reply' && !!count && (
+      {status !== 'running' && !(status && WAITING.includes(status)) && !!count && (
         <span className="nav-badge">{count}</span>
       )}
     </button>

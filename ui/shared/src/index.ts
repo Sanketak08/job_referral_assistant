@@ -32,6 +32,9 @@ export type RunKind = 'preset' | 'custom' | 'handoff' | 'message' | 'compact';
 
 export type RunStatus = 'success' | 'error' | 'stopped' | 'interrupted';
 
+/** cancelled: the run ended or Claude stopped waiting before anyone answered. */
+export type ApprovalOutcome = 'allowed' | 'denied' | 'cancelled';
+
 export interface RunFinishedEvent {
   type: 'run_finished';
   status: RunStatus;
@@ -60,6 +63,9 @@ export type RunEvent =
   | { type: 'usage'; contextTokens: number }
   /** /compact finished; token counts exclude the system prompt and tool definitions. */
   | { type: 'compacted'; preTokens: number; postTokens: number }
+  /** Claude wants a tool that needs permission; answer with POST /api/approvals/:requestId. */
+  | { type: 'permission_request'; requestId: string; toolName: string; input: string }
+  | { type: 'permission_decided'; requestId: string; outcome: ApprovalOutcome }
   /** A line from stderr or stdout that was not stream-json. */
   | { type: 'log'; text: string }
   | RunFinishedEvent;
@@ -133,6 +139,10 @@ export interface JobRef {
   title: string;
   company: string;
   link: string;
+}
+
+export interface ApprovalRequest {
+  allow: boolean;
 }
 
 export interface MessageRequest {

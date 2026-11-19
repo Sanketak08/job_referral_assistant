@@ -25,6 +25,8 @@ export const api = {
   compact: (tab: TabId): Started => request('POST', `/tabs/${tab}/compact`),
   newSession: (tab: TabId) => request<{ ok: true }>('POST', `/tabs/${tab}/new-session`),
   stop: (tab: TabId) => request<{ stopped: boolean }>('POST', `/tabs/${tab}/stop`),
+  approve: (requestId: string, allow: boolean) =>
+    request<{ ok: true }>('POST', `/approvals/${requestId}`, { allow }),
 };
 
 /** Turns any thrown value into a message for the UI. */

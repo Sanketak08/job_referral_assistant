@@ -26,6 +26,7 @@ interface Props {
 const STATUS_TEXT = {
   idle: 'Idle',
   running: 'Running',
+  needs_approval: 'Waiting for your approval',
   needs_reply: 'Waiting for your reply',
   done: 'Idle',
   failed: 'Last run failed',
@@ -40,7 +41,8 @@ export function TabView({ info, runs, sessionId, results }: Props) {
 
   const latest = runs.at(-1);
   const status = tabStatus(latest);
-  const busy = status === 'running';
+  // The process is still alive while it waits for an approval.
+  const busy = status === 'running' || status === 'needs_approval';
   const contextTokens = sessionId ? (latest?.contextTokens ?? null) : null;
 
   /** Runs an API call, showing its error in the tab. Rethrows so callers can react. */
@@ -131,6 +133,7 @@ export function TabView({ info, runs, sessionId, results }: Props) {
             <EventStream
               runs={runs}
               emptyText={`No runs yet. Press "${info.presetLabel}" to start.`}
+              onDecide={(requestId, allow) => act(() => api.approve(requestId, allow))}
             />
             <Composer
               busy={busy}
