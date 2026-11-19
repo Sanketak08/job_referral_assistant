@@ -1,17 +1,31 @@
-import type { ApiError, TabId, TabInfo } from '@jobhunt/shared';
+import type { ApiError, AppInfo, TabId } from '@jobhunt/shared';
 
-async function request<T>(method: 'GET' | 'POST', path: string): Promise<T> {
-  const res = await fetch(`/api${path}`, { method });
-  const body: unknown = await res.json().catch(() => null);
+async function request<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`/api${path}`, {
+    method,
+    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const data: unknown = await res.json().catch(() => null);
   if (!res.ok) {
-    const message = (body as ApiError | null)?.error ?? `${method} ${path} failed (${res.status})`;
+    const message = (data as ApiError | null)?.error ?? `${method} ${path} failed (${res.status})`;
     throw new Error(message);
   }
-  return body as T;
+  return data as T;
 }
 
+type Started = Promise<{ runId: number }>;
+
 export const api = {
-  tabs: () => request<TabInfo[]>('GET', '/tabs'),
-  run: (tab: TabId) => request<{ runId: number }>('POST', `/tabs/${tab}/run`),
+  app: () => request<AppInfo>('GET', '/app'),
+  run: (tab: TabId, prompt?: string): Started => request('POST', `/tabs/${tab}/run`, { prompt }),
+  message: (tab: TabId, text: string): Started => request('POST', `/tabs/${tab}/message`, { text }),
+  compact: (tab: TabId): Started => request('POST', `/tabs/${tab}/compact`),
+  newSession: (tab: TabId) => request<{ ok: true }>('POST', `/tabs/${tab}/new-session`),
   stop: (tab: TabId) => request<{ stopped: boolean }>('POST', `/tabs/${tab}/stop`),
 };
+
+/** Turns any thrown value into a message for the UI. */
+export function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}

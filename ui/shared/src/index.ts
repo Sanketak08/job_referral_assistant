@@ -8,7 +8,24 @@ export interface TabInfo {
   label: string;
   model: string;
   presetLabel: string;
+  presetPrompt: string;
+  /** One line shown in the banner while the tab is idle. */
+  description: string;
+  /** MCP servers this tab loads, for display. */
+  mcpServers: string[];
 }
+
+export interface AppInfo {
+  tabs: TabInfo[];
+  /** First name from input/profile.yaml, for the greeting. */
+  userName: string | null;
+}
+
+/**
+ * preset: the tab's main button. custom: Run with custom input. Both start a new session.
+ * message: chat box, continues the current session. compact: /compact on the current session.
+ */
+export type RunKind = 'preset' | 'custom' | 'message' | 'compact';
 
 export type RunStatus = 'success' | 'error' | 'stopped' | 'interrupted';
 
@@ -24,13 +41,15 @@ export interface RunFinishedEvent {
 
 /** One thing that happened during a run, reduced from Claude's stream-json output. */
 export type RunEvent =
-  | { type: 'run_started'; prompt: string }
+  | { type: 'run_started'; prompt: string; kind: RunKind; resumedSessionId: string | null }
   | { type: 'session'; sessionId: string; model: string }
   | { type: 'text'; text: string }
   | { type: 'tool_use'; toolUseId: string; name: string; summary: string; input: string }
   | { type: 'tool_result'; toolUseId: string; content: string; isError: boolean }
   /** Tokens Claude currently holds in context (latest main-agent API call). */
   | { type: 'usage'; contextTokens: number }
+  /** /compact finished; token counts exclude the system prompt and tool definitions. */
+  | { type: 'compacted'; preTokens: number; postTokens: number }
   /** A line from stderr or stdout that was not stream-json. */
   | { type: 'log'; text: string }
   | RunFinishedEvent;
@@ -44,9 +63,23 @@ export interface StoredEvent {
   event: RunEvent;
 }
 
+/** The Claude session a tab's chat box continues; null after "New session". */
+export type TabSessions = Partial<Record<TabId, string | null>>;
+
 /** Messages on the single WebSocket channel (/ws), server to browser only. */
 export type ServerMessage =
-  { type: 'snapshot'; events: StoredEvent[] } | { type: 'event'; event: StoredEvent };
+  | { type: 'snapshot'; events: StoredEvent[]; sessions: TabSessions }
+  | { type: 'event'; event: StoredEvent }
+  | { type: 'session'; tab: TabId; sessionId: string | null };
+
+export interface RunRequest {
+  /** Custom input. Without it the tab's preset prompt runs. */
+  prompt?: string;
+}
+
+export interface MessageRequest {
+  text: string;
+}
 
 export interface ApiError {
   error: string;

@@ -1,6 +1,6 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import readline from 'node:readline';
-import type { RunEvent, RunFinishedEvent, TabId } from '@jobhunt/shared';
+import type { RunEvent, RunFinishedEvent, RunKind, TabId } from '@jobhunt/shared';
 import { CLAUDE_BIN, REPO_ROOT, type TabPreset } from '../config.ts';
 import { broadcast } from '../live.ts';
 import { createParser } from '../parser/parse.ts';
@@ -18,6 +18,13 @@ interface ActiveRun {
   stderrTail: string;
 }
 
+export interface RunOptions {
+  kind: RunKind;
+  prompt: string;
+  /** Continue this Claude session; null starts a new one. */
+  resumeSessionId: string | null;
+}
+
 const STOP_GRACE_MS = 5000;
 const STDERR_TAIL_CHARS = 2000;
 
@@ -27,13 +34,16 @@ export function isRunning(tab: TabId): boolean {
   return active.has(tab);
 }
 
-export function startRun(tab: TabPreset, prompt: string): number {
+export function startRun(tab: TabPreset, { kind, prompt, resumeSessionId }: RunOptions): number {
   if (active.has(tab.id)) throw new Error(`${tab.label} is already running`);
 
-  const runId = store.createRun(tab.id, prompt);
-  record(runId, tab.id, { type: 'run_started', prompt });
+  const runId = store.createRun(tab.id, kind, prompt);
+  record(runId, tab.id, { type: 'run_started', prompt, kind, resumedSessionId: resumeSessionId });
 
-  const child = spawn(CLAUDE_BIN, buildArgs(tab), { cwd: REPO_ROOT, env: claudeEnv() });
+  const child = spawn(CLAUDE_BIN, buildArgs(tab, resumeSessionId), {
+    cwd: REPO_ROOT,
+    env: claudeEnv(),
+  });
   const run: ActiveRun = {
     runId,
     tab: tab.id,
@@ -55,7 +65,10 @@ export function startRun(tab: TabPreset, prompt: string): number {
         run.result = event;
         continue;
       }
-      if (event.type === 'session') store.setRunSession(runId, event.sessionId);
+      if (event.type === 'session') {
+        store.setRunSession(runId, event.sessionId);
+        setTabSession(tab.id, event.sessionId);
+      }
       record(runId, tab.id, event);
     }
   });
@@ -85,6 +98,11 @@ export function stopRun(tab: TabId): boolean {
     if (active.get(tab) === run) run.child.kill('SIGKILL');
   }, STOP_GRACE_MS).unref();
   return true;
+}
+
+export function setTabSession(tab: TabId, sessionId: string | null): void {
+  store.setTabSession(tab, sessionId);
+  broadcast({ type: 'session', tab, sessionId });
 }
 
 function finish(run: ActiveRun, exitCode: number | null): void {

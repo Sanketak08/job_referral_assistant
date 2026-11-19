@@ -13,7 +13,9 @@ if (fs.existsSync(envFile)) process.loadEnvFile(envFile);
 /** Claude runs from the repo root so CLAUDE.md, .claude/skills and .mcp.json load as in the terminal. */
 export const REPO_ROOT = path.resolve(serverSrc, '../../..');
 export const WEB_ROOT = path.resolve(serverSrc, '../../web');
-export const DB_PATH = path.resolve(serverSrc, '../../data/jobhunt.db');
+export const DB_PATH = process.env.DB_PATH ?? path.resolve(serverSrc, '../../data/jobhunt.db');
+
+export const PROFILE_PATH = path.join(REPO_ROOT, 'input/profile.yaml');
 
 export const PORT = Number(process.env.PORT ?? 3000);
 export const HOST = process.env.HOST ?? '127.0.0.1';
@@ -59,21 +61,27 @@ export interface TabPreset {
   model: string;
   presetLabel: string;
   presetPrompt: string;
+  description: string;
   mcpServers: readonly McpServer[];
 }
 
+// Preset prompts use the slash form so they resolve to the repo skill, not the older
+// anthropic-skills: copy on the account.
 export const TABS: readonly TabPreset[] = [
   {
     id: 'search',
     label: 'Search',
     model: 'opus',
     presetLabel: 'Run daily search',
-    // The slash form resolves to the repo skill, not the older anthropic-skills: copy.
     presetPrompt: '/job-search-phase',
+    description: 'Finds jobs posted in the last 24 hours and ranks them against your profile.',
     // Indeed (Tier 3b), JobSpy (Tier 4), and Tavily/Playwright/Apify for direct-form resolution.
     mcpServers: ['claude_ai_Indeed', 'jobspy', 'tavily', 'playwright', 'apify'],
   },
 ];
+
+/** Prompt that asks Claude to compact the session it is resumed into. */
+export const COMPACT_PROMPT = '/compact';
 
 export function findTab(id: string): TabPreset | undefined {
   return TABS.find((tab) => tab.id === id);

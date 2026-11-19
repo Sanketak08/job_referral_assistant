@@ -15,6 +15,7 @@ interface StreamLine {
   total_cost_usd?: number;
   duration_ms?: number;
   num_turns?: number;
+  compact_metadata?: { pre_tokens?: number; post_tokens?: number };
 }
 
 interface ContentBlock {
@@ -45,9 +46,20 @@ export function createParser(): (line: string) => RunEvent[] {
 
     switch (msg.type) {
       case 'system':
-        return msg.subtype === 'init' && msg.session_id
-          ? [{ type: 'session', sessionId: msg.session_id, model: msg.model ?? '' }]
-          : [];
+        if (msg.subtype === 'init' && msg.session_id) {
+          return [{ type: 'session', sessionId: msg.session_id, model: msg.model ?? '' }];
+        }
+        if (msg.subtype === 'compact_boundary' && msg.compact_metadata) {
+          lastContextTokens = 0;
+          return [
+            {
+              type: 'compacted',
+              preTokens: msg.compact_metadata.pre_tokens ?? 0,
+              postTokens: msg.compact_metadata.post_tokens ?? 0,
+            },
+          ];
+        }
+        return [];
 
       case 'assistant': {
         const events = blocks(msg).flatMap(assistantBlock);

@@ -9,9 +9,11 @@ const HEADLESS_NOTE = [
 ].join(' ');
 
 /** CLI arguments for one run. The prompt itself goes to stdin, so it can never be read as a flag. */
-export function buildArgs(tab: TabPreset): string[] {
+export function buildArgs(tab: TabPreset, resumeSessionId: string | null): string[] {
   const disallowed = ['AskUserQuestion', ...disallowedMcpServers(tab).map((s) => `mcp__${s}`)];
+  const resume = resumeSessionId ? ['--resume', resumeSessionId] : [];
   return [
+    ...resume,
     '--print',
     '--output-format',
     'stream-json',

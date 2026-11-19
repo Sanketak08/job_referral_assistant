@@ -1,11 +1,18 @@
-import type { ServerMessage, StoredEvent } from '@jobhunt/shared';
+import type { ServerMessage, StoredEvent, TabSessions } from '@jobhunt/shared';
 import { useEffect, useState } from 'react';
 
 const RECONNECT_MS = 2000;
 
-/** Keeps every tab's events in sync over the /ws channel, reconnecting when it drops. */
-export function useLive(): { events: StoredEvent[]; connected: boolean } {
+export interface LiveState {
+  events: StoredEvent[];
+  sessions: TabSessions;
+  connected: boolean;
+}
+
+/** Keeps every tab's events and sessions in sync over the /ws channel, reconnecting on drops. */
+export function useLive(): LiveState {
   const [events, setEvents] = useState<StoredEvent[]>([]);
+  const [sessions, setSessions] = useState<TabSessions>({});
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
@@ -19,9 +26,19 @@ export function useLive(): { events: StoredEvent[]; connected: boolean } {
       socket.onopen = () => setConnected(true);
       socket.onmessage = (e: MessageEvent<string>) => {
         const msg = JSON.parse(e.data) as ServerMessage;
-        // Each connection starts with a full snapshot, so a reconnect never leaves gaps.
-        if (msg.type === 'snapshot') setEvents(msg.events);
-        else setEvents((prev) => [...prev, msg.event]);
+        switch (msg.type) {
+          // Each connection starts with a full snapshot, so a reconnect never leaves gaps.
+          case 'snapshot':
+            setEvents(msg.events);
+            setSessions(msg.sessions);
+            break;
+          case 'event':
+            setEvents((prev) => [...prev, msg.event]);
+            break;
+          case 'session':
+            setSessions((prev) => ({ ...prev, [msg.tab]: msg.sessionId }));
+            break;
+        }
       };
       socket.onclose = () => {
         setConnected(false);
@@ -37,5 +54,5 @@ export function useLive(): { events: StoredEvent[]; connected: boolean } {
     };
   }, []);
 
-  return { events, connected };
+  return { events, sessions, connected };
 }

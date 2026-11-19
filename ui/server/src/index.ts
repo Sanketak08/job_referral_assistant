@@ -4,7 +4,7 @@ import express from 'express';
 import { HISTORY_RUNS_PER_TAB, HOST, IS_DEV, PORT, TABS, WEB_ROOT } from './config.ts';
 import { attachLive } from './live.ts';
 import { apiRouter } from './routes/api.ts';
-import { closeInterruptedRuns, recentEvents } from './store/db.ts';
+import { closeInterruptedRuns, getTabSession, recentEvents } from './store/db.ts';
 
 if (process.env.ANTHROPIC_API_KEY) {
   console.warn(
@@ -22,6 +22,7 @@ const server = http.createServer(app);
 attachLive(server, () => ({
   type: 'snapshot',
   events: TABS.flatMap((tab) => recentEvents(tab.id, HISTORY_RUNS_PER_TAB)),
+  sessions: Object.fromEntries(TABS.map((tab) => [tab.id, getTabSession(tab.id)])),
 }));
 
 if (IS_DEV) {
