@@ -45,7 +45,10 @@
   --banner-running: linear-gradient(120deg, #1f2b26, #34413a);
   --banner-attention: linear-gradient(120deg, #a9532e, #c0693f);
   --banner-failed: linear-gradient(120deg, #7e2738, #9a3346);
-  --banner-stopped: linear-gradient(120deg, #4f4a3c, #6a6350);
+  /* Stopped is calm, not a problem: a light sand panel instead of a dark banner. */
+  --banner-stopped: linear-gradient(120deg, #efe8d8, #e5dcc7);
+  --banner-stopped-text: #1f2b26;
+  --banner-stopped-border: #d3cbb6;
   --banner-text: #fbf9f3;
   --scrim: rgb(31 43 38 / 45%);
   --shadow: 0 1px 2px rgb(31 43 38 / 6%), 0 1px 3px rgb(31 43 38 / 8%);
@@ -93,7 +96,9 @@
     --banner-running: linear-gradient(120deg, #26352e, #3b4c43);
     --banner-attention: linear-gradient(120deg, #9c4b27, #b05a32);
     --banner-failed: linear-gradient(120deg, #6e2231, #85293b);
-    --banner-stopped: linear-gradient(120deg, #3c3a30, #4f4b3e);
+    --banner-stopped: linear-gradient(120deg, #2c2a24, #38342b);
+    --banner-stopped-text: #ece8dc;
+    --banner-stopped-border: #454034;
     --banner-text: #ece8dc;
     --scrim: rgb(0 0 0 / 55%);
     --shadow: 0 1px 2px rgb(0 0 0 / 35%);
@@ -139,7 +144,9 @@
   --banner-running: linear-gradient(120deg, #26352e, #3b4c43);
   --banner-attention: linear-gradient(120deg, #9c4b27, #b05a32);
   --banner-failed: linear-gradient(120deg, #6e2231, #85293b);
-  --banner-stopped: linear-gradient(120deg, #3c3a30, #4f4b3e);
+  --banner-stopped: linear-gradient(120deg, #2c2a24, #38342b);
+  --banner-stopped-text: #ece8dc;
+  --banner-stopped-border: #454034;
   --banner-text: #ece8dc;
   --scrim: rgb(0 0 0 / 55%);
   --shadow: 0 1px 2px rgb(0 0 0 / 35%);
@@ -697,7 +704,7 @@ nav {
   z-index: 1;
   margin: 0;
   max-width: 78%;
-  color: color-mix(in srgb, currentColor 82%, transparent);
+  opacity: 0.85;
 }
 
 .banner-art {
@@ -705,7 +712,7 @@ nav {
   right: 28px;
   top: 50%;
   transform: translateY(-50%) rotate(-8deg);
-  color: color-mix(in srgb, currentColor 14%, transparent);
+  opacity: 0.14;
 }
 
 /* Green: ready or done. Charcoal: Claude is working. Terracotta: your turn. Wine: failed. */
@@ -724,6 +731,8 @@ nav {
 
 .banner-stopped {
   background: var(--banner-stopped);
+  color: var(--banner-stopped-text);
+  box-shadow: inset 0 0 0 1px var(--banner-stopped-border);
 }
 
 /* ---------- Sections ---------- */
