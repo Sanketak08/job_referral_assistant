@@ -1,17 +1,20 @@
+# Python
 .venv/
 __pycache__/
 *.pyc
-.env
-data/gmail_credentials.json
-data/gmail_token.json
-data/run_history.jsonl
 
+# Secrets: every .env variant is private, only the blank templates are committed
+.env*
+!.env.example
+!.env.example.old
 .claude/settings.local.json
 CLAUDE.local.md
 .agents/credentials.json
 .agents/mcp_config.json
 
+# Playwright MCP traces and page snapshots saved at the repo root
 .playwright-mcp/
+/*.yml
 
 # Keep the input/ and output/ folders in git, but not what is inside them
 output/*
@@ -23,4 +26,5 @@ input/resumes/*
 !input/resumes/.gitkeep
 scratch/
 
-meta.yml
+# macOS
+.DS_Store

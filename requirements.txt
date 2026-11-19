@@ -1,10 +1,8 @@
-google-genai>=1.40.0
-pydantic>=2.8.0
-PyYAML>=6.0.2
-python-dotenv>=1.0.1
-requests>=2.32.0
-beautifulsoup4>=4.12.3
-lxml>=5.3.0
-google-api-python-client>=2.180.0
-google-auth-httplib2>=0.2.0
-google-auth-oauthlib>=1.2.1
+# Python packages used by the jobspy and gmail MCP servers (.agents/)
+# and the job-search-phase scripts (.claude/skills/job-search-phase/scripts/).
+mcp<2
+python-jobspy
+pandas
+pyyaml
+requests
+playwright

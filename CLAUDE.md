@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-An agent-driven daily job-hunt workflow run entirely through Claude Code skills and MCP servers (no Python entry point). Ask Claude to "run daily pipeline" and it executes the skills below. The old Python pipeline in `app/` (Gemini/Apollo/Gmail API) is legacy and not used.
+An agent-driven daily job-hunt workflow run entirely through Claude Code skills and MCP servers (no Python entry point). Ask Claude to "run daily pipeline" and it executes the skills below. Runs on macOS only.
 
 ## Layout
 

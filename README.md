@@ -43,7 +43,7 @@ Your profile is a single file that holds everything about you: name, contact det
 
 1. Go to the `input` folder.
 2. Make a copy of `profile.example.yaml` and name the copy **`profile.yaml`**.
-3. Open `profile.yaml` in any text editor (Notepad works) and fill in your details. Lines starting with `#` are explanations, not data.
+3. Open `profile.yaml` in any text editor (TextEdit works) and fill in your details. Lines starting with `#` are explanations, not data.
 
 The assistant **never invents information about you**. If something is missing, it will stop and ask.
 
@@ -74,11 +74,10 @@ This file is **private**. It is on the "do not upload" list (see section 6), so 
 Two tools (`jobspy` for job boards, `gmail` for sending email) are small Python programs that live in the `.agents` folder. Open a terminal in this project folder and run these once:
 
 ```
-python -m venv .venv
-.venv/bin/pip install "mcp<2" python-jobspy pandas
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/playwright install chromium
 ```
-
-(On Windows, use `.venv\Scripts\pip` instead, and in `.mcp.json` change `.venv/bin/python` to `.venv\\Scripts\\python.exe`.)
 
 The paths in `.mcp.json` are relative to the project folder, so no other editing is needed.
 
@@ -131,7 +130,7 @@ Also open `.claude/settings.local.json` and confirm none of the five values is e
 
 ## 3. How to use it with Claude Code
 
-1. Open a terminal (Command Prompt, PowerShell, or Terminal).
+1. Open the Terminal app.
 2. Go into this project's folder, for example: `cd path/to/job_referral_assistant`
 3. Type `claude` and press Enter. Claude Code starts and automatically learns the project and its skills.
 4. Type what you want in plain English. Examples:
@@ -207,8 +206,7 @@ job_referral_assistant/
 Notes:
 
 - **`input/`** is where you put things the assistant needs to read. **`output/`** is where it writes its results. You can open the `.csv` files in Excel or Google Sheets.
-- The folders `app/`, `data/` and `config.yaml` belong to an older version of this project and are no longer used.
-- Folders starting with a dot (like `.claude`) are hidden on some computers. In File Explorer, enable "Show hidden files".
+- Folders starting with a dot (like `.claude`) are hidden in Finder. Press `Cmd + Shift + .` to show them.
 
 ---
 
