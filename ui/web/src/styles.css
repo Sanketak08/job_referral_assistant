@@ -1277,6 +1277,7 @@ nav {
 }
 
 .results-bar {
+  flex: none;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1306,6 +1307,9 @@ nav {
 }
 
 .table-card {
+  /* Never shrink: it sits in scrolling flex columns, and shrinking would clip rows (with
+     overflow: hidden) instead of letting the column scroll. */
+  flex: none;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
@@ -1525,6 +1529,16 @@ nav {
   .activity {
     flex: none;
     height: 78dvh;
+  }
+
+  /* Tables grow with their rows so the page scrolls as one, instead of a box inside a box. */
+  .activity.showing-results {
+    height: auto;
+    overflow: visible;
+  }
+
+  .activity.showing-results .results {
+    overflow: visible;
   }
 }
 
@@ -1749,6 +1763,7 @@ nav {
 }
 
 .stats {
+  flex: none;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
@@ -1781,6 +1796,7 @@ nav {
 }
 
 .section-title {
+  flex: none;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;

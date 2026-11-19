@@ -103,7 +103,9 @@ export function TabView({ info, runs, sessionId, results }: Props) {
         </div>
       )}
 
-      <section className="activity">
+      <section
+        className={section === 'results' && results ? 'activity showing-results' : 'activity'}
+      >
         <div className="section-head">
           {results ? (
             <div className="segmented" role="tablist">
