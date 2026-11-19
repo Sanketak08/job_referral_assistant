@@ -5,8 +5,10 @@ import { Header } from './components/Header.tsx';
 import { Sidebar, type TodayUsage } from './components/Sidebar.tsx';
 import { useHashRoute } from './hooks/useHashRoute.ts';
 import { useLive } from './hooks/useLive.ts';
+import { useOutputs } from './hooks/useOutputs.ts';
 import { useTheme } from './hooks/useTheme.ts';
 import { groupRuns, tabStatus, type RunView, type TabStatus } from './tabs/runs.ts';
+import { newJobCount, resultsFor } from './tabs/results.tsx';
 import { TabView } from './tabs/TabView.tsx';
 
 export function App() {
@@ -16,7 +18,8 @@ export function App() {
   const [theme, cycleTheme] = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const { events, sessions, connected } = useLive();
+  const { events, sessions, connected, outputsVersion } = useLive();
+  const outputs = useOutputs(outputsVersion);
 
   useEffect(() => {
     api
@@ -45,7 +48,7 @@ export function App() {
       <Sidebar
         tabs={app?.tabs ?? []}
         statuses={statuses}
-        counts={{}}
+        counts={{ search: newJobCount(outputs) }}
         view={activeTab?.id ?? view}
         onNavigate={go}
         collapsed={collapsed}
@@ -68,6 +71,7 @@ export function App() {
             info={activeTab}
             runs={runsByTab.get(activeTab.id) ?? []}
             sessionId={sessions[activeTab.id] ?? null}
+            results={resultsFor(activeTab.id, outputs)}
           />
         )}
       </main>

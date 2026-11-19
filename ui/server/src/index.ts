@@ -2,7 +2,8 @@ import http from 'node:http';
 import path from 'node:path';
 import express from 'express';
 import { HISTORY_RUNS_PER_TAB, HOST, IS_DEV, PORT, TABS, WEB_ROOT } from './config.ts';
-import { attachLive } from './live.ts';
+import { watchOutputs } from './files/outputs.ts';
+import { attachLive, broadcast } from './live.ts';
 import { apiRouter } from './routes/api.ts';
 import { closeInterruptedRuns, getTabSession, recentEvents } from './store/db.ts';
 
@@ -24,6 +25,7 @@ attachLive(server, () => ({
   events: TABS.flatMap((tab) => recentEvents(tab.id, HISTORY_RUNS_PER_TAB)),
   sessions: Object.fromEntries(TABS.map((tab) => [tab.id, getTabSession(tab.id)])),
 }));
+watchOutputs(() => broadcast({ type: 'outputs_changed' }));
 
 if (IS_DEV) {
   // One process and one port in dev too: Vite serves the React app with hot reload.

@@ -16,6 +16,8 @@ export const WEB_ROOT = path.resolve(serverSrc, '../../web');
 export const DB_PATH = process.env.DB_PATH ?? path.resolve(serverSrc, '../../data/jobhunt.db');
 
 export const PROFILE_PATH = path.join(REPO_ROOT, 'input/profile.yaml');
+/** Where the skills write their CSVs (daily_jobs_*.csv, applied_jobs.csv, contacted_people.csv). */
+export const OUTPUT_DIR = path.join(REPO_ROOT, 'output');
 
 export const PORT = Number(process.env.PORT ?? 3000);
 export const HOST = process.env.HOST ?? '127.0.0.1';

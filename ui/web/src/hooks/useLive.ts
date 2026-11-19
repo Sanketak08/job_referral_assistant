@@ -7,6 +7,8 @@ export interface LiveState {
   events: StoredEvent[];
   sessions: TabSessions;
   connected: boolean;
+  /** Increases whenever output/ changes, so data hooks know to refetch. */
+  outputsVersion: number;
 }
 
 /** Keeps every tab's events and sessions in sync over the /ws channel, reconnecting on drops. */
@@ -14,6 +16,7 @@ export function useLive(): LiveState {
   const [events, setEvents] = useState<StoredEvent[]>([]);
   const [sessions, setSessions] = useState<TabSessions>({});
   const [connected, setConnected] = useState(false);
+  const [outputsVersion, setOutputsVersion] = useState(0);
 
   useEffect(() => {
     let socket: WebSocket | undefined;
@@ -31,6 +34,10 @@ export function useLive(): LiveState {
           case 'snapshot':
             setEvents(msg.events);
             setSessions(msg.sessions);
+            setOutputsVersion((v) => v + 1);
+            break;
+          case 'outputs_changed':
+            setOutputsVersion((v) => v + 1);
             break;
           case 'event':
             setEvents((prev) => [...prev, msg.event]);
@@ -54,5 +61,5 @@ export function useLive(): LiveState {
     };
   }, []);
 
-  return { events, sessions, connected };
+  return { events, sessions, connected, outputsVersion };
 }

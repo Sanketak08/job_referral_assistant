@@ -1,5 +1,5 @@
 import type { TabInfo } from '@jobhunt/shared';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { api, errorMessage } from '../api/client.ts';
 import { Composer } from '../components/Composer.tsx';
 import { Dialog } from '../components/Dialog.tsx';
@@ -9,10 +9,18 @@ import { RunMenu } from '../components/RunMenu.tsx';
 import { Banner } from './Banner.tsx';
 import { tabStatus, type RunView } from './runs.ts';
 
+/** A tab's second view next to Activity, e.g. the Matches table. */
+export interface ResultsView {
+  label: string;
+  count: number;
+  content: ReactNode;
+}
+
 interface Props {
   info: TabInfo;
   runs: RunView[];
   sessionId: string | null;
+  results?: ResultsView;
 }
 
 const STATUS_TEXT = {
@@ -25,9 +33,10 @@ const STATUS_TEXT = {
 } as const;
 
 /** One component for every pipeline tab; the differences come from TabInfo. */
-export function TabView({ info, runs, sessionId }: Props) {
+export function TabView({ info, runs, sessionId, results }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [customOpen, setCustomOpen] = useState(false);
+  const [section, setSection] = useState<'activity' | 'results'>('activity');
 
   const latest = runs.at(-1);
   const status = tabStatus(latest);
@@ -94,15 +103,43 @@ export function TabView({ info, runs, sessionId }: Props) {
 
       <section className="activity">
         <div className="section-head">
-          <h3>Activity</h3>
+          {results ? (
+            <div className="segmented" role="tablist">
+              <button
+                role="tab"
+                aria-selected={section === 'activity'}
+                onClick={() => setSection('activity')}
+              >
+                Activity
+              </button>
+              <button
+                role="tab"
+                aria-selected={section === 'results'}
+                onClick={() => setSection('results')}
+              >
+                {results.label} <span className="count">{results.count}</span>
+              </button>
+            </div>
+          ) : (
+            <h3>Activity</h3>
+          )}
         </div>
-        <EventStream runs={runs} emptyText={`No runs yet. Press "${info.presetLabel}" to start.`} />
-        <Composer
-          busy={busy}
-          sessionId={sessionId}
-          contextTokens={contextTokens}
-          onSend={(text) => act(() => api.message(info.id, text))}
-        />
+        {section === 'results' && results ? (
+          results.content
+        ) : (
+          <>
+            <EventStream
+              runs={runs}
+              emptyText={`No runs yet. Press "${info.presetLabel}" to start.`}
+            />
+            <Composer
+              busy={busy}
+              sessionId={sessionId}
+              contextTokens={contextTokens}
+              onSend={(text) => act(() => api.message(info.id, text))}
+            />
+          </>
+        )}
       </section>
 
       {customOpen && (

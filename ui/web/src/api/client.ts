@@ -1,4 +1,4 @@
-import type { ApiError, AppInfo, TabId } from '@jobhunt/shared';
+import type { ApiError, AppInfo, Outputs, TabId } from '@jobhunt/shared';
 
 async function request<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
   const res = await fetch(`/api${path}`, {
@@ -18,6 +18,7 @@ type Started = Promise<{ runId: number }>;
 
 export const api = {
   app: () => request<AppInfo>('GET', '/app'),
+  outputs: () => request<Outputs>('GET', '/outputs'),
   run: (tab: TabId, prompt?: string): Started => request('POST', `/tabs/${tab}/run`, { prompt }),
   message: (tab: TabId, text: string): Started => request('POST', `/tabs/${tab}/message`, { text }),
   compact: (tab: TabId): Started => request('POST', `/tabs/${tab}/compact`),

@@ -70,7 +70,47 @@ export type TabSessions = Partial<Record<TabId, string | null>>;
 export type ServerMessage =
   | { type: 'snapshot'; events: StoredEvent[]; sessions: TabSessions }
   | { type: 'event'; event: StoredEvent }
-  | { type: 'session'; tab: TabId; sessionId: string | null };
+  | { type: 'session'; tab: TabId; sessionId: string | null }
+  /** A file in output/ changed; refetch /api/outputs. */
+  | { type: 'outputs_changed' };
+
+/** A row of the latest output/daily_jobs_*.csv, marked with what already happened to it. */
+export interface JobRow {
+  title: string;
+  company: string;
+  location: string;
+  /** As written by the search skill, usually YYYY-MM-DD. */
+  datePosted: string;
+  matchScore: number | null;
+  ranking: number | null;
+  source: string;
+  link: string;
+  /** The link is in applied_jobs.csv. */
+  applied: boolean;
+  /** Someone at this company is in contacted_people.csv. */
+  contacted: boolean;
+}
+
+export interface AppliedRow {
+  link: string;
+  company: string;
+  title: string;
+  appliedAt: string;
+}
+
+export interface ContactRow {
+  email: string;
+  company: string;
+  contactedAt: string;
+}
+
+export interface Outputs {
+  /** File name of the newest daily_jobs CSV, or null when there is none. */
+  jobsFile: string | null;
+  jobs: JobRow[];
+  applied: AppliedRow[];
+  contacted: ContactRow[];
+}
 
 export interface RunRequest {
   /** Custom input. Without it the tab's preset prompt runs. */

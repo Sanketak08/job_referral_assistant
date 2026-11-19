@@ -1,6 +1,7 @@
-import type { ApiError, AppInfo, MessageRequest, RunRequest } from '@jobhunt/shared';
+import type { ApiError, AppInfo, MessageRequest, Outputs, RunRequest } from '@jobhunt/shared';
 import { Router, type Request, type Response } from 'express';
 import { COMPACT_PROMPT, findTab, TABS, type TabPreset } from '../config.ts';
+import { readOutputs } from '../files/outputs.ts';
 import { readFirstName } from '../files/profile.ts';
 import { isRunning, setTabSession, startRun, stopRun } from '../runner/runner.ts';
 import { getTabSession } from '../store/db.ts';
@@ -22,6 +23,10 @@ apiRouter.get('/app', (_req, res: Response<AppInfo>) => {
     })),
     userName: readFirstName(),
   });
+});
+
+apiRouter.get('/outputs', (_req, res: Response<Outputs>) => {
+  res.json(readOutputs());
 });
 
 /** Resolves :tab and rejects when it is unknown or (for starting runs) busy. */
