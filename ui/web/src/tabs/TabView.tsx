@@ -30,7 +30,7 @@ const STATUS_TEXT = {
   needs_reply: 'Waiting for your reply',
   done: 'Idle',
   failed: 'Last run failed',
-  stopped: 'Stopped',
+  stopped: 'Idle',
 } as const;
 
 /** One component for every pipeline tab; the differences come from TabInfo. */
@@ -60,7 +60,7 @@ export function TabView({ info, runs, sessionId, results }: Props) {
   return (
     <div className="card tab-card">
       <div className="card-toolbar">
-        <span className={`pill pill-${status}`}>
+        <span className={`pill pill-${status === 'stopped' ? 'idle' : status}`}>
           {busy ? <span className="spinner" /> : <span className="status-dot" />}
           {STATUS_TEXT[status]}
         </span>

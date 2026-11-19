@@ -25,7 +25,8 @@ export function Banner({ info, status, latest }: Props) {
   const { chip, title, detail } = describe(info, status, latest, now);
 
   return (
-    <div className={`banner banner-${status}`}>
+    // A stopped run leaves the tab ready again, so it shares the green Ready look.
+    <div className={`banner banner-${status === 'stopped' ? 'idle' : status}`}>
       <span className="banner-chip">
         {chip}
         {status === 'running' ? (
@@ -102,9 +103,10 @@ function describe(
       };
     case 'stopped':
       return {
-        chip: 'Stopped',
-        title: 'Run stopped',
-        detail: 'Send a message to continue the same session, or start a new run.',
+        chip: 'Ready',
+        title: info.description,
+        detail:
+          'Last run was stopped. Send a message to pick up where it left off, or start a new run.',
       };
   }
 }
