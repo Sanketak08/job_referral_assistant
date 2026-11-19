@@ -1,0 +1,7 @@
+node_modules/
+dist/
+# SQLite database with run history (prompts, tool output, personal data)
+data/
+*.db
+*.sqlite
+*.log

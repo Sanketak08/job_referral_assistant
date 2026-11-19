@@ -15,6 +15,7 @@ An agent-driven daily job-hunt workflow run entirely through Claude Code skills 
 - `.agents/gmail_mcp.py` — custom Gmail SMTP MCP server (tool `send_email_with_attachment(to_email, subject, body, attachment_path)`, uses `GMAIL_ADDRESS` / `GMAIL_APP_PASSWORD`). Needs the `mcp` Python package.
 - `input/profile.yaml` — candidate source of truth (titles, exclusions, tech stack, answers to form fields, `email_signature`). `input/resumes/` holds the PDFs (`Sanket_Backend_Engineer_EU.pdf`, `Sanket_Data_Engineer_EU.pdf`, `Sanket_Agentic_AI_Engineer_EU.pdf`).
 - `output/` — `daily_jobs_[DATE]_[TIME].csv`, `applied_jobs.csv` (no header: `Job Link, Timestamp`), `contacted_people.csv`.
+- `ui/` — local web UI (TypeScript, npm workspaces: `shared`, `server`, `web`) that runs the skills through `claude -p`. Per-tab presets, models and MCP servers live in `ui/server/src/config.ts`. See `ui/README.md`. Check with `npm run typecheck && npm run lint` in `ui/`.
 - `scratch/` — one-off Playwright scripts; root PNGs and `hyra_job.html` are throwaway artifacts.
 
 ## Skills (run in order by `daily-pipeline`)

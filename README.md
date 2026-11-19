@@ -142,6 +142,10 @@ Also open `.claude/settings.local.json` and confirm none of the five values is e
 | `apply to the top 3 jobs from the latest list` | Fills the forms for those jobs and shows you a screenshot before submitting. |
 | `find referral contacts for the Stripe job` | Finds engineers at that company and drafts the emails. |
 
+### Or use the web UI
+
+Instead of typing in terminals, you can run the pipeline from a small web page on your Mac (and your phone, through Tailscale). See [`ui/README.md`](ui/README.md).
+
 ### What to expect while it runs
 
 - **It will ask you questions.** If an application asks for something not in your profile, it pauses and asks. Your answer can be saved in `profile.yaml` so it won't ask again.
