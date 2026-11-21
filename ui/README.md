@@ -46,18 +46,41 @@ one that used the Apply skill: the UI's Apply tab needs the same Playwright brow
 The page only listens on your Mac. Tailscale makes it reachable from your own devices, privately
 and over HTTPS. Nothing is opened to the internet.
 
-1. Install Tailscale on the Mac ([download](https://tailscale.com/download) or the Mac App Store)
-   and on your phone. Sign in to **the same account** on both.
-2. With the UI running, run this once on the Mac:
-   ```sh
-   tailscale serve --bg 3000
-   ```
-   With the App Store version, use the full path:
-   `/Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg 3000`
-3. It prints an address like `https://your-mac.your-tailnet.ts.net`. Open it on your phone and
-   add it to the home screen.
+**On the Mac**
 
-`tailscale serve status` shows the address again; `tailscale serve --https=443 off` turns it off.
+1. Install Tailscale: `brew install --cask tailscale-app` (or the
+   [download](https://tailscale.com/download) / Mac App Store). Open it, allow the VPN
+   configuration when macOS asks, and click **Log in**.
+2. In the Tailscale menu-bar icon → Settings, turn on **Launch Tailscale at login**.
+3. With the UI running, run this once (the Tailscale command lives inside the app):
+   ```sh
+   /Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg 3000
+   ```
+   The first time, it may say **"Serve is not enabled on your tailnet"** and show a link. Open the
+   link, click **Enable**, and the command finishes by itself. It then prints your address, like
+   `https://your-mac.your-tailnet.ts.net`. This setting survives restarts; you only do it once.
+
+**On the phone**
+
+1. Install **Tailscale** (App Store or Play Store), log in with **the same account** as on the
+   Mac, allow the VPN, and keep the switch on.
+2. Open the address from step 3 in Safari or Chrome.
+3. Add it to the home screen: iPhone **Share → Add to Home Screen**; Android Chrome
+   **⋮ → Add to Home screen**.
+4. Android only: set **Settings → Apps → Tailscale → Battery** to **Unrestricted**, and turn on
+   **Always-on VPN** for Tailscale (Settings → Network → VPN), so the connection does not drop
+   when the phone is idle or restarts.
+
+The link works only while the Mac is awake, the UI is running and Tailscale is on, on both
+devices.
+
+To see the address again or turn it off:
+
+```sh
+/Applications/Tailscale.app/Contents/MacOS/Tailscale serve status
+/Applications/Tailscale.app/Contents/MacOS/Tailscale serve --https=443 off
+```
+
 Never use `tailscale funnel` here: that would make the page public, and it can run commands and
 send emails.
 
@@ -107,14 +130,14 @@ a battery charge limit (System Settings → Battery), set it to about 80 %.
 
 ## If something goes wrong
 
-| Problem                                      | Fix                                                                                             |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `Claude Code not found on PATH`              | Install Claude Code and check that `claude` works in Terminal                                   |
-| Port 3000 is already in use                  | Put `PORT=3001` in `ui/.env` (see `ui/.env.example`) and use that port everywhere               |
-| Apply fails with "Browser is already in use" | Close other Claude Code sessions that use Playwright                                            |
-| Phone cannot open the page                   | The UI must be running, and both devices signed in to Tailscale; check `tailscale serve status` |
-| Old icon or old look after an update         | Hard refresh: **Cmd+Shift+R**                                                                   |
-| Start over with an empty history             | Stop the UI and delete `ui/data/jobhunt.db`                                                     |
+| Problem                                      | Fix                                                                                                                         |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `Claude Code not found on PATH`              | Install Claude Code and check that `claude` works in Terminal                                                               |
+| Port 3000 is already in use                  | Put `PORT=3001` in `ui/.env` (see `ui/.env.example`) and use that port everywhere                                           |
+| Apply fails with "Browser is already in use" | Close other Claude Code sessions that use Playwright                                                                        |
+| Phone cannot open the page                   | Check the Mac is awake and the UI is running, and Tailscale is on on both devices (on Android, battery set to Unrestricted) |
+| Old icon or old look after an update         | Hard refresh: **Cmd+Shift+R**                                                                                               |
+| Start over with an empty history             | Stop the UI and delete `ui/data/jobhunt.db`                                                                                 |
 
 ## For developers
 
