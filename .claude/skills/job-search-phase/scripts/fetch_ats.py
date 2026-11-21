@@ -267,6 +267,84 @@ if D['eu_open_api'].get('enabled', True) and adz and adz.get('enabled'):
                         break
         print(f'adzuna: {n_adz} jobs', file=sys.stderr)
 
+
+def source_cfg(name):
+    s = next((s for s in D['eu_open_api']['sources'] if s['name'] == name), None)
+    return s if D['eu_open_api'].get('enabled', True) and s and s.get('enabled') else None
+
+
+getro = source_cfg('Getro')
+if getro:
+    for b in getro['boards']:
+        n = 0
+        try:
+            for pg in range(getro.get('max_pages', 10)):
+                r = requests.post(f"https://api.getro.com/api/v2/collections/{b['collection_id']}/search/jobs", timeout=T,
+                                  headers={**H, 'Accept': 'application/json', 'Content-Type': 'application/json', 'Origin': b['origin']},
+                                  json={'hitsPerPage': 20, 'page': pg, 'query': '', 'filters': {'job_functions': getro.get('job_functions', [])}})
+                r.raise_for_status()
+                page = r.json().get('results', {}).get('jobs', [])
+                for j in page:
+                    jobs.append(dict(title=j['title'], company=(j.get('organization') or {}).get('name', ''), loc=', '.join(j.get('locations') or []),
+                                     date=pdt(j.get('created_at')), link=j.get('url', ''), desc='', source=b['name'], new_id=False))
+                n += len(page)
+                # featured jobs are pinned on top whatever their age; stop once a page has nothing fresh
+                if len(page) < 20 or not any((pdt(j.get('created_at')) or CUT) > CUT for j in page if not j.get('featured')):
+                    break
+        except Exception as e:
+            log.append(f"getro {b['name']} {type(e).__name__}")
+        print(f"getro {b['name']}: {n} jobs", file=sys.stderr)
+
+
+def jobthing_apply_link(url):
+    """The employer's own job page linked from a JobThing posting (longest external path, not the IND register)."""
+    t = get(url).text.replace('\\"', '"')
+    ext = [u for u in re.findall(r'https?://[^"\s<>\\]+', t)
+           if not re.search(r'jobthing\.|ind\.nl|w3\.org|schema\.org|google|cloudflare|clerk|sentry|vercel|gstatic|\.(js|css|png|svg|ico|woff2?|jpe?g|webp)(\?|$)', u)]
+    ext = [u for u in ext if urlsplit(u).path.strip('/')]
+    return max(ext, key=len) if ext else None
+
+
+jt = source_cfg('JobThing')
+if jt:
+    rows, seen = [], set()
+    try:
+        for pg in range(1, jt.get('max_pages', 10) + 1):
+            t = get(jt['url'].format(page=pg)).text.replace('\\"', '"')
+            new = 0
+            for chunk in t.split('"jt-row jt-jr')[1:]:  # one listing row each (Next.js payload)
+                m = re.search(r'"href":"(/jobs/(\d+)-[^"]+)".*?"children":"([^"]+)"', chunk)
+                if not m or m.group(2) in seen:
+                    continue
+                seen.add(m.group(2)); new += 1
+                co = re.search(r'"jt-jr__co","children":\[\["\$","b",null,\{"children":"([^"]+)"', chunk)
+                loc = re.search(r'"jt-jr__co".*?\["\$","span","([^"]+)"', chunk)
+                posted = re.search(r'"postedAt":"([^"]+)"', chunk)
+                rows.append(dict(title=html.unescape(m.group(3)), company=html.unescape(co.group(1)) if co else '',
+                                 loc=f"{loc.group(1) if loc else ''}, Netherlands",
+                                 date=pdt(posted.group(1).replace(' ', 'T').replace('+00', '+00:00')) if posted else None,
+                                 link='https://jobthing.nl' + m.group(1), desc='', source='JobThing', new_id=False,
+                                 visa='yes' if 'jt-jr__visa' in chunk else None))
+            if not new:
+                break
+        if not rows:
+            log.append('jobthing: 0 rows parsed (page layout changed?)')
+        inc, exc = re.compile(D['title_include_regex']), re.compile(D['title_exclude_regex'])
+        resolved = 0
+        for o in rows:
+            if jt.get('resolve_apply_links') and o['date'] and o['date'] >= CUT and inc.search(o['title']) and not exc.search(o['title']):
+                try:
+                    direct = jobthing_apply_link(o['link'])
+                    if direct:
+                        o['jobthing_link'], o['link'] = o['link'], direct
+                        resolved += 1
+                except Exception:
+                    pass
+            jobs.append(o)
+        print(f'jobthing: {len(rows)} jobs, {resolved} apply links resolved', file=sys.stderr)
+    except Exception as e:
+        log.append(f'jobthing {type(e).__name__}')
+
 fresh = [j for j in jobs if (j['date'] and j['date'] >= CUT) or j['new_id']]
 for j in fresh:
     j['why'] = 'new_id' if j['new_id'] and not (j['date'] and j['date'] >= CUT) else 'date'
