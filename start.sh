@@ -17,7 +17,8 @@ unset ANTHROPIC_API_KEY
 command -v node >/dev/null || { echo "Node.js not found. Install Node 24+ (nvm install 24)." >&2; exit 1; }
 command -v claude >/dev/null || { echo "Claude Code not found on PATH." >&2; exit 1; }
 
-[ -d node_modules ] || npm install
+# Quick when nothing changed; picks up new dependencies after a git pull.
+npm install --no-audit --no-fund --loglevel=error
 npm run build
 
 # caffeinate -i: no idle sleep; -s: no system sleep while on power. Closing the lid still sleeps
