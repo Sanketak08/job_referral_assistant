@@ -29,7 +29,10 @@ export function Sidebar(props: Props) {
         <span className="brand-mark">
           <Icon name="briefcase" size={18} />
         </span>
-        <span className="brand-name">Job Hunt</span>
+        <span className="brand-text">
+          <span className="brand-name">Job Hunt</span>
+          <span className="brand-sub">Powered by Claude</span>
+        </span>
         <button
           className="btn btn-ghost btn-icon collapse-toggle"
           onClick={onToggleCollapsed}

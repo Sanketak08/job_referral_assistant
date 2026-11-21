@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import { useDismiss } from '../hooks/useDismiss.ts';
 import { Icon, type IconName } from './Icon.tsx';
 
@@ -16,7 +17,11 @@ interface Props {
   className?: string;
 }
 
-/** A "⋯" button with a menu. The menu is fixed-positioned so scrolling containers cannot clip it. */
+/**
+ * A "⋯" button with a menu. The menu is portalled to <body> and fixed-positioned, so neither
+ * scrolling containers nor glass panels (backdrop-filter makes them the containing block for
+ * fixed elements) can clip or offset it.
+ */
 export function ActionMenu({
   actions,
   label,
@@ -24,8 +29,9 @@ export function ActionMenu({
 }: Props) {
   const [style, setStyle] = useState<CSSProperties | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const close = useCallback(() => setStyle(null), []);
-  useDismiss(ref, style !== null, close);
+  useDismiss([ref, menuRef], style !== null, close);
 
   const open = (button: HTMLButtonElement): void => {
     const rect = button.getBoundingClientRect();
@@ -33,7 +39,8 @@ export function ActionMenu({
     setStyle({
       position: 'fixed',
       right: window.innerWidth - rect.right,
-      ...(below ? { top: rect.bottom + 4 } : { bottom: window.innerHeight - rect.top + 4 }),
+      top: below ? rect.bottom + 4 : 'auto',
+      bottom: below ? 'auto' : window.innerHeight - rect.top + 4,
     });
   };
 
@@ -47,23 +54,25 @@ export function ActionMenu({
       >
         <Icon name="dots" size={16} />
       </button>
-      {style && (
-        <div className="menu" role="menu" style={style}>
-          {actions.map((action) => (
-            <button
-              key={action.label}
-              role="menuitem"
-              disabled={action.disabled}
-              onClick={() => {
-                close();
-                action.onClick();
-              }}
-            >
-              <Icon name={action.icon} size={15} /> {action.label}
-            </button>
-          ))}
-        </div>
-      )}
+      {style &&
+        createPortal(
+          <div ref={menuRef} className="menu" role="menu" style={style}>
+            {actions.map((action) => (
+              <button
+                key={action.label}
+                role="menuitem"
+                disabled={action.disabled}
+                onClick={() => {
+                  close();
+                  action.onClick();
+                }}
+              >
+                <Icon name={action.icon} size={15} /> {action.label}
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

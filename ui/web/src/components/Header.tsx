@@ -21,7 +21,11 @@ export function Header({ userName, connected, theme, onCycleTheme, onOpenMenu }:
       <div className="greeting">
         <h1>
           {greeting(today.getHours())}
-          {userName ? `, ${userName}` : ''}
+          {userName && (
+            <>
+              , <span className="greeting-name">{userName}</span>
+            </>
+          )}
         </h1>
         <p>
           {today.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}
