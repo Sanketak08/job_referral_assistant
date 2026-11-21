@@ -106,8 +106,13 @@ export function TabView({ info, runs, sessionId, results, editor }: Props) {
             </button>
           ))}
           {busy && (
-            <button className="btn btn-danger" onClick={fire(() => api.stop(info.id))}>
-              <Icon name="stop" size={13} /> Stop
+            <button
+              className="btn btn-danger toolbar-stop"
+              onClick={fire(() => api.stop(info.id))}
+              title="Stop"
+              aria-label="Stop"
+            >
+              <Icon name="stop" size={13} /> <span className="btn-label">Stop</span>
             </button>
           )}
           <RunMenu

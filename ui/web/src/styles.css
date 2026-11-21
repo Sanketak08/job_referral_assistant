@@ -2325,3 +2325,99 @@ nav {
     text-align: left;
   }
 }
+
+/* ---------- Touch sizing (phones and tablets) ----------
+   Every control is at least 40px tall and every icon button a true 42px square, close to
+   Apple's 44pt touch target. Toolbar items never shrink, so nothing gets squeezed or pushed off
+   the edge when Stop appears. */
+@media (max-width: 900px) {
+  .btn,
+  .btn-sm,
+  .select,
+  .chip,
+  .segmented button {
+    min-height: 40px;
+  }
+
+  .btn-sm {
+    height: 40px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+
+  .select {
+    height: 40px;
+  }
+
+  .segmented button {
+    height: 40px;
+    padding: 0 16px;
+  }
+
+  .chip {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+
+  /* Square icon buttons, wherever they sit (toolbar, composer, dialogs, tables, header). */
+  .btn-icon,
+  .tab-card .btn-icon,
+  .btn-sm.btn-icon,
+  .row-menu-button,
+  .toolbar-more,
+  .dialog-head .btn {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    padding: 0;
+    flex: none;
+  }
+
+  .tab-card .toolbar-actions > *:not(.split),
+  .action-menu {
+    flex: none;
+  }
+
+  /* Expandable tool rows and history prompts are easy to tap. */
+  .tool summary {
+    min-height: 42px;
+    padding: 8px 12px;
+  }
+
+  .link-button {
+    min-height: 40px;
+  }
+
+  /* Links inside table cards get a taller hit area without looking bigger. */
+  .table td a {
+    display: inline-block;
+    padding: 10px 0;
+  }
+
+  .table input[type='checkbox'] {
+    width: 22px;
+    height: 22px;
+  }
+
+  .composer-box textarea {
+    min-height: 40px;
+    padding: 9px 0;
+  }
+
+  .composer-box {
+    align-items: center;
+  }
+}
+
+@media (max-width: 420px) {
+  /* Narrow phones: Stop becomes an icon square so Run keeps its room. */
+  .toolbar-stop {
+    width: 42px;
+    padding: 0;
+    flex: none;
+  }
+
+  .toolbar-stop .btn-label {
+    display: none;
+  }
+}
