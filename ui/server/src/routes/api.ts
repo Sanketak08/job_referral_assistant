@@ -2,6 +2,7 @@ import type {
   ApiError,
   AppInfo,
   ApprovalRequest,
+  EditRequest,
   MessageRequest,
   MessageResult,
   Outputs,
@@ -12,9 +13,18 @@ import type {
   StoredEvent,
 } from '@jobhunt/shared';
 import { Router, type Request, type Response } from 'express';
-import { COMPACT_PROMPT, findTab, HISTORY_LIMIT, TABS, type TabPreset } from '../config.ts';
+import {
+  COMPACT_PROMPT,
+  EDITOR_TAB,
+  editPrompt,
+  findTab,
+  HISTORY_LIMIT,
+  TABS,
+  type TabPreset,
+} from '../config.ts';
 import { readOutputs } from '../files/outputs.ts';
 import {
+  backupProfile,
   ProfileConflictError,
   readFirstName,
   readProfile,
@@ -30,7 +40,7 @@ type Reply<T> = Response<T | ApiError>;
 
 apiRouter.get('/app', (_req, res: Response<AppInfo>) => {
   res.json({
-    tabs: TABS.map((tab) => ({
+    tabs: TABS.filter((tab) => !tab.hidden).map((tab) => ({
       id: tab.id,
       label: tab.label,
       model: tab.model,
@@ -39,6 +49,7 @@ apiRouter.get('/app', (_req, res: Response<AppInfo>) => {
       description: tab.description,
       mcpServers: [...tab.mcpServers],
       acceptsJobs: !!tab.handoffPrompt,
+      skill: tab.skill ?? null,
     })),
     userName: readFirstName(),
   });
@@ -186,5 +197,38 @@ apiRouter.put(
         return void res.status(409).json({ error: err.message });
       throw err;
     }
+  },
+);
+
+/** "Edit with Claude": a new editor session that changes the profile or a tab's skill. */
+apiRouter.post(
+  '/edit',
+  (req: Request<unknown, unknown, EditRequest>, res: Reply<{ runId: number }>) => {
+    const editor = findTab(EDITOR_TAB);
+    const request = req.body.request?.trim();
+    if (!editor) return void res.status(500).json({ error: 'Editor is not configured' });
+    if (!request) return void res.status(400).json({ error: 'Describe the change you want' });
+    if (isRunning(editor.id)) {
+      return void res.status(409).json({ error: 'Claude is still working on another edit' });
+    }
+
+    let prompt: string;
+    if (req.body.target === 'profile') {
+      backupProfile();
+      prompt = editPrompt({ profile: true }, request);
+    } else {
+      const skill = findTab(req.body.target)?.skill;
+      if (!skill)
+        return void res.status(400).json({ error: `Nothing to edit for ${req.body.target}` });
+      prompt = editPrompt({ skill }, request);
+    }
+
+    const runId = startRun(editor, {
+      kind: 'edit',
+      prompt,
+      display: request,
+      resumeSessionId: null,
+    });
+    res.status(202).json({ runId });
   },
 );

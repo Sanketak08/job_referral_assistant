@@ -83,7 +83,7 @@ export function MatchesTable(props: Props) {
       <div className="results-bar">
         {files.length > 0 ? (
           <label className="results-file">
-            <span className="muted">Jobs from</span>
+            <span className="muted results-file-label">Jobs from</span>
             <select
               className="select"
               value={selectedFile ?? ''}

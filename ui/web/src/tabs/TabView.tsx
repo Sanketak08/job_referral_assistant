@@ -1,12 +1,15 @@
 import type { TabInfo } from '@jobhunt/shared';
 import { useState, type ReactNode } from 'react';
 import { api, errorMessage } from '../api/client.ts';
+import { ActionMenu, type MenuAction } from '../components/ActionMenu.tsx';
 import { Composer } from '../components/Composer.tsx';
 import { Dialog } from '../components/Dialog.tsx';
+import { EditWithClaude, type EditorState } from '../components/EditWithClaude.tsx';
 import { EventStream } from '../components/EventStream.tsx';
 import { Icon } from '../components/Icon.tsx';
 import { RunMenu } from '../components/RunMenu.tsx';
 import { Banner } from './Banner.tsx';
+import { EDIT_EXAMPLES } from './editExamples.ts';
 import { tabStatus, type RunView } from './runs.ts';
 
 /** A tab's second view next to Activity, e.g. the Matches table. */
@@ -21,6 +24,7 @@ interface Props {
   runs: RunView[];
   sessionId: string | null;
   results?: ResultsView;
+  editor: EditorState;
 }
 
 const STATUS_TEXT = {
@@ -34,9 +38,10 @@ const STATUS_TEXT = {
 } as const;
 
 /** One component for every pipeline tab; the differences come from TabInfo. */
-export function TabView({ info, runs, sessionId, results }: Props) {
+export function TabView({ info, runs, sessionId, results, editor }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [customOpen, setCustomOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [section, setSection] = useState<'activity' | 'results'>('activity');
 
   const latest = runs.at(-1);
@@ -57,6 +62,30 @@ export function TabView({ info, runs, sessionId, results }: Props) {
   };
   const fire = (call: () => Promise<unknown>) => () => void act(call).catch(() => {});
 
+  // Shown as buttons on wide screens and folded into a "⋯" menu on phones.
+  const secondary: MenuAction[] = [
+    ...(info.skill
+      ? [{ label: 'Edit skill', icon: 'edit' as const, onClick: () => setEditOpen(true) }]
+      : []),
+    {
+      label: 'New session',
+      icon: 'plus',
+      disabled: busy || !sessionId,
+      onClick: fire(() => api.newSession(info.id)),
+    },
+    {
+      label: 'Compact',
+      icon: 'compress',
+      disabled: busy || !sessionId,
+      onClick: fire(() => api.compact(info.id)),
+    },
+  ];
+  const tips: Record<string, string> = {
+    'Edit skill': `Ask Claude to change the ${info.skill ?? ''} skill`,
+    'New session': 'Clear context: the next message starts a new Claude session',
+    Compact: 'Summarise the session with /compact to free up context',
+  };
+
   return (
     <div className="card tab-card">
       <div className="card-toolbar">
@@ -65,22 +94,17 @@ export function TabView({ info, runs, sessionId, results }: Props) {
           {STATUS_TEXT[status]}
         </span>
         <div className="toolbar-actions">
-          <button
-            className="btn"
-            disabled={busy || !sessionId}
-            onClick={fire(() => api.newSession(info.id))}
-            title="Clear context: the next message starts a new Claude session"
-          >
-            <Icon name="plus" size={15} /> <span className="btn-text">New session</span>
-          </button>
-          <button
-            className="btn"
-            disabled={busy || !sessionId}
-            onClick={fire(() => api.compact(info.id))}
-            title="Summarise the session with /compact to free up context"
-          >
-            <Icon name="compress" size={15} /> <span className="btn-text">Compact</span>
-          </button>
+          {secondary.map((action) => (
+            <button
+              key={action.label}
+              className="btn toolbar-secondary"
+              disabled={action.disabled}
+              onClick={action.onClick}
+              title={tips[action.label]}
+            >
+              <Icon name={action.icon} size={15} /> {action.label}
+            </button>
+          ))}
           {busy && (
             <button className="btn btn-danger" onClick={fire(() => api.stop(info.id))}>
               <Icon name="stop" size={13} /> Stop
@@ -91,6 +115,11 @@ export function TabView({ info, runs, sessionId, results }: Props) {
             disabled={busy}
             onPreset={fire(() => api.run(info.id))}
             onCustom={() => setCustomOpen(true)}
+          />
+          <ActionMenu
+            actions={secondary}
+            label="More actions"
+            className="btn btn-icon toolbar-more"
           />
         </div>
       </div>
@@ -146,6 +175,23 @@ export function TabView({ info, runs, sessionId, results }: Props) {
           </>
         )}
       </section>
+
+      {editOpen && info.skill && (
+        <EditWithClaude
+          title={`Edit the ${info.label} skill`}
+          intro={
+            <p>
+              Claude changes <code>.claude/skills/{info.skill}/SKILL.md</code> (and its scripts if
+              needed) the way you describe. Your next {info.label} run uses the new version. The
+              skill is a plain file in git, so <code>git diff</code> shows exactly what changed.
+            </p>
+          }
+          target={info.id}
+          examples={EDIT_EXAMPLES[info.id]}
+          editor={editor}
+          onClose={() => setEditOpen(false)}
+        />
+      )}
 
       {customOpen && (
         <CustomRunDialog

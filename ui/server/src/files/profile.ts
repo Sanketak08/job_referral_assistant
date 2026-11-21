@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import type { ProfileFile } from '@jobhunt/shared';
 import { PROFILE_PATH } from '../config.ts';
 
@@ -38,4 +39,27 @@ export function writeProfile(text: string, baseModifiedAt: number): ProfileFile 
   fs.copyFileSync(PROFILE_PATH, `${PROFILE_PATH}.bak`);
   fs.writeFileSync(PROFILE_PATH, text);
   return readProfile();
+}
+
+/** Copies profile.yaml to profile.yaml.bak (before Claude edits it). */
+export function backupProfile(): void {
+  if (fs.existsSync(PROFILE_PATH)) fs.copyFileSync(PROFILE_PATH, `${PROFILE_PATH}.bak`);
+}
+
+/**
+ * Calls `onChange` (debounced) when profile.yaml is written, whoever writes it. Watches the folder
+ * because editors and Claude often replace the file, which ends a watch on the file itself.
+ */
+export function watchProfile(onChange: () => void): void {
+  const name = path.basename(PROFILE_PATH);
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    fs.watch(path.dirname(PROFILE_PATH), (_event, changed) => {
+      if (changed !== name) return;
+      clearTimeout(timer);
+      timer = setTimeout(onChange, 300);
+    });
+  } catch (err) {
+    console.warn(`Not watching ${PROFILE_PATH}: ${String(err)}`);
+  }
 }

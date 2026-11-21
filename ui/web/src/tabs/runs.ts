@@ -54,7 +54,7 @@ export function groupRuns(events: StoredEvent[]): RunView[] {
     const { event } = stored;
     switch (event.type) {
       case 'run_started':
-        run.prompt = event.prompt;
+        run.prompt = event.display ?? event.prompt;
         // Runs stored before sessions existed have neither field.
         run.kind = event.kind ?? 'preset';
         run.newSession = !event.resumedSessionId;

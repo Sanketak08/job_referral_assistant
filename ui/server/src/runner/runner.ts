@@ -29,6 +29,8 @@ interface ActiveRun {
 export interface RunOptions {
   kind: RunKind;
   prompt: string;
+  /** Shown in the UI instead of the prompt. */
+  display?: string;
   /** Continue this Claude session; null starts a new one. */
   resumeSessionId: string | null;
 }
@@ -42,11 +44,20 @@ export function isRunning(tab: TabId): boolean {
   return active.has(tab);
 }
 
-export function startRun(tab: TabPreset, { kind, prompt, resumeSessionId }: RunOptions): number {
+export function startRun(
+  tab: TabPreset,
+  { kind, prompt, display, resumeSessionId }: RunOptions,
+): number {
   if (active.has(tab.id)) throw new Error(`${tab.label} is already running`);
 
-  const runId = store.createRun(tab.id, kind, prompt);
-  record(runId, tab.id, { type: 'run_started', prompt, kind, resumedSessionId: resumeSessionId });
+  const runId = store.createRun(tab.id, kind, display ?? prompt);
+  record(runId, tab.id, {
+    type: 'run_started',
+    prompt,
+    kind,
+    resumedSessionId: resumeSessionId,
+    ...(display ? { display } : {}),
+  });
 
   const child = spawn(CLAUDE_BIN, buildArgs(tab, runId, resumeSessionId), {
     cwd: REPO_ROOT,

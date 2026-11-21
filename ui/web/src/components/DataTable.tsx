@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { useDismiss } from '../hooks/useDismiss.ts';
-import { Icon, type IconName } from './Icon.tsx';
+import { useState, type ReactNode } from 'react';
+import { ActionMenu, type MenuAction } from './ActionMenu.tsx';
+import { Icon } from './Icon.tsx';
 
 export interface Column<T> {
   key: string;
@@ -10,12 +10,7 @@ export interface Column<T> {
   sortValue?: (row: T) => string | number;
 }
 
-export interface RowAction {
-  label: string;
-  icon: IconName;
-  onClick: () => void;
-  disabled?: boolean;
-}
+export type RowAction = MenuAction;
 
 interface Sort {
   key: string;
@@ -162,7 +157,7 @@ export function DataTable<T>(props: Props<T>) {
                   ))}
                   {rowActions && (
                     <td className="col-actions">
-                      <RowMenu actions={rowActions(row)} />
+                      <ActionMenu actions={rowActions(row)} label="Row actions" />
                     </td>
                   )}
                 </tr>
@@ -225,51 +220,4 @@ function sortRows<T>(rows: T[], columns: Column<T>[], sort: Sort | undefined): T
         : String(x).localeCompare(String(y))) * sign
     );
   });
-}
-
-/** The "⋯" button. The menu is fixed-positioned so the scrolling table cannot clip it. */
-function RowMenu({ actions }: { actions: RowAction[] }) {
-  const [style, setStyle] = useState<CSSProperties | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
-  const close = useCallback(() => setStyle(null), []);
-  useDismiss(ref, style !== null, close);
-
-  const open = (button: HTMLButtonElement): void => {
-    const rect = button.getBoundingClientRect();
-    const below = window.innerHeight - rect.bottom > 160;
-    setStyle({
-      position: 'fixed',
-      right: window.innerWidth - rect.right,
-      ...(below ? { top: rect.bottom + 4 } : { bottom: window.innerHeight - rect.top + 4 }),
-    });
-  };
-
-  return (
-    <div ref={ref}>
-      <button
-        className="btn btn-sm btn-icon row-menu-button"
-        onClick={(e) => (style ? close() : open(e.currentTarget))}
-        aria-label="Row actions"
-      >
-        <Icon name="dots" size={16} />
-      </button>
-      {style && (
-        <div className="menu" role="menu" style={style}>
-          {actions.map((action) => (
-            <button
-              key={action.label}
-              role="menuitem"
-              disabled={action.disabled}
-              onClick={() => {
-                close();
-                action.onClick();
-              }}
-            >
-              <Icon name={action.icon} size={14} /> {action.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
 }

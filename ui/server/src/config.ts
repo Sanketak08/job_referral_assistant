@@ -73,6 +73,10 @@ export interface TabPreset {
   askTools?: readonly string[];
   /** Builds the prompt when jobs are sent here from the Matches table. */
   handoffPrompt?: (jobs: JobRef[]) => string;
+  /** The skill this tab runs; the tab's "Edit skill" button changes it. */
+  skill?: string;
+  /** Not a pipeline step, so not shown in the sidebar (the editor). */
+  hidden?: boolean;
 }
 
 const jobList = (jobs: JobRef[]): string =>
@@ -87,6 +91,7 @@ export const TABS: readonly TabPreset[] = [
     model: 'opus',
     presetLabel: 'Run daily search',
     presetPrompt: '/job-search-phase',
+    skill: 'job-search-phase',
     description: 'Finds jobs posted in the last 24 hours and ranks them against your profile.',
     // Indeed (Tier 3b), JobSpy (Tier 4), and Tavily/Playwright/Apify for direct-form resolution.
     mcpServers: ['claude_ai_Indeed', 'jobspy', 'tavily', 'playwright', 'apify'],
@@ -97,6 +102,7 @@ export const TABS: readonly TabPreset[] = [
     model: 'sonnet',
     presetLabel: 'Apply to top matches',
     presetPrompt: '/job-application-phase',
+    skill: 'job-application-phase',
     description:
       'Fills each application form from your profile and waits for your OK before submitting.',
     // Playwright fills the forms; Tavily finds the company's own page for aggregator links.
@@ -110,6 +116,7 @@ export const TABS: readonly TabPreset[] = [
     model: 'sonnet',
     presetLabel: 'Find referrals',
     presetPrompt: '/job-referral-phase',
+    skill: 'job-referral-phase',
     description:
       'Checks visa and relocation, finds engineers at the company and drafts emails for your approval.',
     // No Playwright: Apply uses it, and both tabs would fight over the same browser profile.
@@ -119,7 +126,52 @@ export const TABS: readonly TabPreset[] = [
     handoffPrompt: (jobs) =>
       `/job-referral-phase Find referral contacts for these jobs, one company at a time:\n${jobList(jobs)}`,
   },
+  {
+    // Runs "Edit with Claude" requests for the profile and the skills, separate from the
+    // pipeline tabs so an edit never blocks or mixes with a search, application or referral.
+    id: 'editor',
+    label: 'Editor',
+    model: 'opus',
+    presetLabel: 'Edit',
+    presetPrompt: '',
+    description: 'Edits your profile and the pipeline skills when you ask.',
+    mcpServers: [],
+    hidden: true,
+  },
 ];
+
+export const EDITOR_TAB = 'editor';
+
+/** The prompt for an "Edit with Claude" request. The user only sees their own words. */
+export function editPrompt(target: { profile: true } | { skill: string }, request: string): string {
+  if ('profile' in target) {
+    // The configured file, so a test server with PROFILE_PATH never touches the real profile.
+    const rel = path.relative(REPO_ROOT, PROFILE_PATH);
+    const file = rel.startsWith('..') ? PROFILE_PATH : rel;
+    return [
+      `You are editing the user's job-search profile at ${file}.`,
+      'Make exactly the change the user asks for below and nothing else.',
+      'Keep the YAML valid and keep the existing structure, comments and indentation.',
+      'Never invent facts about the user. If the request is unclear or needs information you',
+      'do not have, ask instead of guessing.',
+      'When done, reply with a short list of what changed (field: old → new).',
+      '',
+      `User request:\n${request}`,
+    ].join('\n');
+  }
+  const dir = `.claude/skills/${target.skill}`;
+  return [
+    `You are editing the ${target.skill} skill used by the job-hunt pipeline: ${dir}/SKILL.md`,
+    `and, only if the change needs it, the scripts in ${dir}/scripts/.`,
+    'Make exactly the change the user asks for below.',
+    'Keep the skill structure and its safety rules (approval before submitting an application or',
+    'sending an email, never inventing profile data) unless the user explicitly asks otherwise.',
+    'Edit .claude/skills only, not the older copy in .agents/skills. Do not run the skill.',
+    'When done, reply with a short summary of what changed.',
+    '',
+    `User request:\n${request}`,
+  ].join('\n');
+}
 
 /**
  * How long Claude Code waits for an MCP tool, here the approval tool (ms). The default is far

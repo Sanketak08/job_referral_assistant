@@ -159,6 +159,7 @@ function RunPrompt({ run }: { run: RunView }) {
     <div className="msg-user">
       {run.kind === 'custom' && <span className="msg-label">Custom run</span>}
       {run.kind === 'handoff' && <span className="msg-label">Sent from Matches</span>}
+      {run.kind === 'edit' && <span className="msg-label">Edit request</span>}
       {run.prompt}
     </div>
   );

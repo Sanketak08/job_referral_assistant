@@ -9,6 +9,8 @@ export interface LiveState {
   connected: boolean;
   /** Increases whenever output/ changes, so data hooks know to refetch. */
   outputsVersion: number;
+  /** Increases whenever input/profile.yaml changes on disk. */
+  profileVersion: number;
 }
 
 /** Keeps every tab's events and sessions in sync over the /ws channel, reconnecting on drops. */
@@ -17,6 +19,7 @@ export function useLive(): LiveState {
   const [sessions, setSessions] = useState<TabSessions>({});
   const [connected, setConnected] = useState(false);
   const [outputsVersion, setOutputsVersion] = useState(0);
+  const [profileVersion, setProfileVersion] = useState(0);
 
   useEffect(() => {
     let socket: WebSocket | undefined;
@@ -38,6 +41,9 @@ export function useLive(): LiveState {
             break;
           case 'outputs_changed':
             setOutputsVersion((v) => v + 1);
+            break;
+          case 'profile_changed':
+            setProfileVersion((v) => v + 1);
             break;
           case 'event':
             setEvents((prev) => [...prev, msg.event]);
@@ -61,5 +67,5 @@ export function useLive(): LiveState {
     };
   }, []);
 
-  return { events, sessions, connected, outputsVersion };
+  return { events, sessions, connected, outputsVersion, profileVersion };
 }

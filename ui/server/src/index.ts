@@ -3,6 +3,7 @@ import path from 'node:path';
 import express from 'express';
 import { HISTORY_RUNS_PER_TAB, HOST, IS_DEV, PORT, TABS, WEB_ROOT } from './config.ts';
 import { watchOutputs } from './files/outputs.ts';
+import { watchProfile } from './files/profile.ts';
 import { attachLive, broadcast } from './live.ts';
 import { mcpRouter } from './mcp/permissionServer.ts';
 import { apiRouter } from './routes/api.ts';
@@ -30,6 +31,7 @@ attachLive(server, () => ({
   sessions: Object.fromEntries(TABS.map((tab) => [tab.id, getTabSession(tab.id)])),
 }));
 watchOutputs(() => broadcast({ type: 'outputs_changed' }));
+watchProfile(() => broadcast({ type: 'profile_changed' }));
 
 if (IS_DEV) {
   // One process and one port in dev too: Vite serves the React app with hot reload.

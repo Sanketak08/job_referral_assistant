@@ -39,7 +39,8 @@ export function HistoryPage({ tabs, version }: Props) {
   }, [version]);
 
   const week = useMemo(() => weekStats(runs), [runs]);
-  const label = (id: string): string => tabs.find((t) => t.id === id)?.label ?? id;
+  const label = (id: string): string =>
+    tabs.find((t) => t.id === id)?.label ?? (id === 'editor' ? 'Edit' : id);
 
   const columns: Column<RunSummary>[] = [
     { key: 'id', label: 'Run', sortValue: (r) => r.id, render: (r) => `#${r.id}` },

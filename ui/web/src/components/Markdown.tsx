@@ -115,7 +115,7 @@ function Table({ rows }: { rows: string[] }) {
 }
 
 const INLINE =
-  /(`[^`]+`)|(\*\*[^*]+\*\*)|(\[[^\]]+\]\(https?:\/\/[^)\s]+\))|(https?:\/\/[^\s<>)\]]+)|(\*[^*\s][^*]*\*|_[^_\s][^_]*_)/g;
+  /(`[^`]+`)|(\*\*[^*]+\*\*)|(\[[^\]]+\]\(https?:\/\/[^)\s]+\))|(https?:\/\/[^\s<>)\]]+)|(\*[^*\s][^*]*\*|(?<![\p{L}\p{N}])_[^_\s][^_]*_(?![\p{L}\p{N}]))/gu;
 
 function inline(text: string): ReactNode[] {
   const out: ReactNode[] = [];

@@ -1,6 +1,7 @@
 import type {
   ApiError,
   AppInfo,
+  EditRequest,
   JobRef,
   MessageResult,
   Outputs,
@@ -49,6 +50,8 @@ export const api = {
   profile: () => request<ProfileFile>('GET', '/profile'),
   saveProfile: (text: string, baseModifiedAt: number) =>
     request<ProfileFile>('PUT', '/profile', { text, baseModifiedAt }),
+  edit: (target: EditRequest['target'], text: string): Started =>
+    request('POST', '/edit', { target, request: text }),
   approve: (requestId: string, allow: boolean) =>
     request<{ ok: true }>('POST', `/approvals/${requestId}`, { allow }),
 };

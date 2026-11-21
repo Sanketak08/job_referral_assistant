@@ -1,6 +1,7 @@
 import type { AppInfo, JobRef, StoredEvent, TabId } from '@jobhunt/shared';
 import { useEffect, useMemo, useState } from 'react';
 import { api, errorMessage } from './api/client.ts';
+import { BottomNav } from './components/BottomNav.tsx';
 import { Header } from './components/Header.tsx';
 import { Sidebar, type TodayUsage } from './components/Sidebar.tsx';
 import { useHashRoute } from './hooks/useHashRoute.ts';
@@ -20,7 +21,7 @@ export function App() {
   const [theme, cycleTheme] = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const { events, sessions, connected, outputsVersion } = useLive();
+  const { events, sessions, connected, outputsVersion, profileVersion } = useLive();
   const [jobsFile, setJobsFile] = useState<string | null>(null);
   const outputs = useOutputs(outputsVersion, jobsFile);
 
@@ -38,6 +39,10 @@ export function App() {
     return out;
   }, [app, runsByTab]);
   const today = useMemo(() => todayUsage(events), [events]);
+  const editor = {
+    runs: runsByTab.get('editor') ?? [],
+    sessionId: sessions.editor ?? null,
+  };
 
   const go = (next: string): void => {
     navigate(next);
@@ -88,13 +93,14 @@ export function App() {
           </div>
         )}
         {page === 'history' && <HistoryPage tabs={app?.tabs ?? []} version={runEventsSeen} />}
-        {page === 'profile' && <ProfilePage />}
+        {page === 'profile' && <ProfilePage version={profileVersion} editor={editor} />}
         {activeTab && (
           <TabView
             key={activeTab.id}
             info={activeTab}
             runs={runsByTab.get(activeTab.id) ?? []}
             sessionId={sessions[activeTab.id] ?? null}
+            editor={editor}
             results={resultsFor(activeTab.id, {
               outputs,
               tabs: app?.tabs ?? [],
@@ -105,6 +111,13 @@ export function App() {
           />
         )}
       </main>
+      <BottomNav
+        tabs={app?.tabs ?? []}
+        statuses={statuses}
+        counts={{ search: outputs.newInLatest }}
+        view={activeTab?.id ?? view}
+        onNavigate={go}
+      />
     </div>
   );
 }

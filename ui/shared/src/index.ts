@@ -1,6 +1,7 @@
 // Types shared by the server and the web app. Types only, so nothing here exists at runtime.
 
-export type TabId = 'search' | 'apply' | 'referral';
+/** 'editor' runs "Edit with Claude" requests; it is not a pipeline tab. */
+export type TabId = 'search' | 'apply' | 'referral' | 'editor';
 
 /** What the web app needs to know about a tab. The full preset lives in server/src/config.ts. */
 export interface TabInfo {
@@ -15,6 +16,8 @@ export interface TabInfo {
   mcpServers: string[];
   /** Jobs from the Matches table can be sent here. */
   acceptsJobs: boolean;
+  /** The skill this tab runs, editable with "Edit skill". */
+  skill: string | null;
 }
 
 export interface AppInfo {
@@ -28,7 +31,7 @@ export interface AppInfo {
  * Matches table. All three start a new session.
  * message: chat box, continues the current session. compact: /compact on the current session.
  */
-export type RunKind = 'preset' | 'custom' | 'handoff' | 'message' | 'compact';
+export type RunKind = 'preset' | 'custom' | 'handoff' | 'message' | 'compact' | 'edit';
 
 export type RunStatus = 'success' | 'error' | 'stopped' | 'interrupted';
 
@@ -47,7 +50,14 @@ export interface RunFinishedEvent {
 
 /** One thing that happened during a run, reduced from Claude's stream-json output. */
 export type RunEvent =
-  | { type: 'run_started'; prompt: string; kind: RunKind; resumedSessionId: string | null }
+  | {
+      type: 'run_started';
+      prompt: string;
+      kind: RunKind;
+      resumedSessionId: string | null;
+      /** What the UI shows instead of the full prompt (e.g. just the user's edit request). */
+      display?: string;
+    }
   | { type: 'session'; sessionId: string; model: string }
   | { type: 'text'; text: string }
   /** A chat message sent while the run was already working. */
@@ -90,7 +100,9 @@ export type ServerMessage =
   | { type: 'event'; event: StoredEvent }
   | { type: 'session'; tab: TabId; sessionId: string | null }
   /** A file in output/ changed; refetch /api/outputs. */
-  | { type: 'outputs_changed' };
+  | { type: 'outputs_changed' }
+  /** input/profile.yaml changed on disk (saved here, or edited by Claude). */
+  | { type: 'profile_changed' };
 
 /** A row of the latest output/daily_jobs_*.csv, marked with what already happened to it. */
 export interface JobRow {
@@ -150,6 +162,12 @@ export interface JobRef {
   title: string;
   company: string;
   link: string;
+}
+
+/** "Edit with Claude": change the profile or a pipeline tab's skill. */
+export interface EditRequest {
+  target: 'profile' | TabId;
+  request: string;
 }
 
 export interface ApprovalRequest {
