@@ -32,7 +32,11 @@ type Started = Promise<{ runId: number }>;
 
 export const api = {
   app: () => request<AppInfo>('GET', '/app'),
-  outputs: () => request<Outputs>('GET', '/outputs'),
+  outputs: (jobsFile?: string | null) =>
+    request<Outputs>(
+      'GET',
+      jobsFile ? `/outputs?jobsFile=${encodeURIComponent(jobsFile)}` : '/outputs',
+    ),
   run: (tab: TabId, prompt?: string): Started => request('POST', `/tabs/${tab}/run`, { prompt }),
   handoff: (tab: TabId, jobs: JobRef[]): Started => request('POST', `/tabs/${tab}/run`, { jobs }),
   message: (tab: TabId, text: string) =>

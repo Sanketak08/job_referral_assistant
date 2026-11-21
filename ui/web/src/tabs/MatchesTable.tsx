@@ -1,12 +1,18 @@
-import type { JobRow } from '@jobhunt/shared';
+import type { JobRow, JobsFileInfo } from '@jobhunt/shared';
 import { useState, type ReactNode } from 'react';
 import { DataTable, type Column, type RowAction } from '../components/DataTable.tsx';
 import { Icon } from '../components/Icon.tsx';
-import { postedAgo } from './dates.ts';
+import { jobsFileLabel, postedAgo } from './dates.ts';
 
 interface Props {
   jobs: JobRow[];
+  /** The CSV the rows come from. */
   jobsFile: string | null;
+  /** Every daily_jobs CSV, newest first. */
+  files: JobsFileInfo[];
+  /** The file picked in the dropdown; null follows the newest CSV as new ones appear. */
+  selectedFile: string | null;
+  onSelectFile: (name: string | null) => void;
   /** Buttons shown when rows are selected; gets the selected jobs and a reset callback. */
   selectionActions?: (jobs: JobRow[], clear: () => void) => ReactNode;
   /** Extra entries for a row's "⋯" menu. */
@@ -63,7 +69,8 @@ const COLUMNS: Column<JobRow>[] = [
   },
 ];
 
-export function MatchesTable({ jobs, jobsFile, selectionActions, rowActions }: Props) {
+export function MatchesTable(props: Props) {
+  const { jobs, jobsFile, files, selectedFile, onSelectFile, selectionActions, rowActions } = props;
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [hideApplied, setHideApplied] = useState(false);
 
@@ -74,15 +81,26 @@ export function MatchesTable({ jobs, jobsFile, selectionActions, rowActions }: P
   return (
     <div className="results">
       <div className="results-bar">
-        <span className="muted results-file">
-          {jobsFile ? (
-            <>
-              From <code>{jobsFile}</code>
-            </>
-          ) : (
-            'No daily_jobs CSV yet'
-          )}
-        </span>
+        {files.length > 0 ? (
+          <label className="results-file">
+            <span className="muted">Jobs from</span>
+            <select
+              className="select"
+              value={selectedFile ?? ''}
+              onChange={(e) => onSelectFile(e.target.value || null)}
+              title={jobsFile ?? undefined}
+            >
+              {files.map((file, i) => (
+                <option key={file.name} value={i === 0 ? '' : file.name}>
+                  {i === 0 ? 'Latest · ' : ''}
+                  {jobsFileLabel(file.name)} · {file.count} {file.count === 1 ? 'job' : 'jobs'}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <span className="muted results-file">No daily_jobs CSV yet</span>
+        )}
         <div className="results-actions">
           {selectedJobs.length > 0 && (
             <>

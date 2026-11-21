@@ -122,10 +122,19 @@ export interface ContactRow {
   contactedAt: string;
 }
 
+export interface JobsFileInfo {
+  name: string;
+  count: number;
+}
+
 export interface Outputs {
-  /** File name of the newest daily_jobs CSV, or null when there is none. */
+  /** The daily_jobs CSV the jobs come from (the newest unless another was asked for). */
   jobsFile: string | null;
+  /** Every daily_jobs CSV, newest first. */
+  jobsFiles: JobsFileInfo[];
   jobs: JobRow[];
+  /** Jobs in the newest CSV not applied to yet, for the sidebar badge. */
+  newInLatest: number;
   applied: AppliedRow[];
   contacted: ContactRow[];
 }

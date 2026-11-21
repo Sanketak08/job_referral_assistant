@@ -1,34 +1,50 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { AppliedRow, ContactRow, JobRow, Outputs } from '@jobhunt/shared';
+import type { AppliedRow, ContactRow, JobRow, JobsFileInfo, Outputs } from '@jobhunt/shared';
 import { OUTPUT_DIR } from '../config.ts';
 import { parseCsv } from './csv.ts';
 
 const DAILY_JOBS = /^daily_jobs_.*\.csv$/;
 
-/** Everything the tables show, read fresh from output/ on each call (the files are small). */
-export function readOutputs(): Outputs {
+/**
+ * Everything the tables show, read fresh from output/ on each call (the files are small).
+ * `requested` picks an older daily_jobs CSV; anything not in the list falls back to the newest.
+ */
+export function readOutputs(requested?: string): Outputs {
   const applied = readApplied();
   const contacted = readContacted();
   const appliedLinks = new Set(applied.map((row) => row.link));
   const contactedCompanies = new Set(contacted.map((row) => normalize(row.company)));
+  const mark = (job: Omit<JobRow, 'applied' | 'contacted'>): JobRow => ({
+    ...job,
+    applied: appliedLinks.has(job.link),
+    contacted: contactedCompanies.has(normalize(job.company)),
+  });
 
-  const jobsFile = latestDailyJobsFile();
-  const jobs = jobsFile
-    ? readJobs(path.join(OUTPUT_DIR, jobsFile)).map((job) => ({
-        ...job,
-        applied: appliedLinks.has(job.link),
-        contacted: contactedCompanies.has(normalize(job.company)),
-      }))
-    : [];
+  const names = dailyJobsFiles();
+  const jobsByFile = new Map(names.map((name) => [name, readJobs(path.join(OUTPUT_DIR, name))]));
+  const jobsFiles: JobsFileInfo[] = names.map((name) => ({
+    name,
+    count: jobsByFile.get(name)?.length ?? 0,
+  }));
 
-  return { jobsFile, jobs, applied, contacted };
+  // Only names from the listing are ever read, so the query cannot reach other files.
+  const latest = names[0] ?? null;
+  const jobsFile = requested && jobsByFile.has(requested) ? requested : latest;
+  const jobs = (jobsFile ? (jobsByFile.get(jobsFile) ?? []) : []).map(mark);
+  const newInLatest = (latest ? (jobsByFile.get(latest) ?? []) : [])
+    .map(mark)
+    .filter((job) => !job.applied).length;
+
+  return { jobsFile, jobsFiles, jobs, newInLatest, applied, contacted };
 }
 
-function latestDailyJobsFile(): string | null {
-  const files = safeList(OUTPUT_DIR).filter((name) => DAILY_JOBS.test(name));
-  // Names end in _YYYY-MM-DD_HHMMSS, so the last one alphabetically is the newest.
-  return files.sort().at(-1) ?? null;
+/** daily_jobs CSVs, newest first. Names end in _YYYY-MM-DD_HHMMSS, so they sort by time. */
+function dailyJobsFiles(): string[] {
+  return safeList(OUTPUT_DIR)
+    .filter((name) => DAILY_JOBS.test(name))
+    .sort()
+    .reverse();
 }
 
 function readJobs(file: string): Omit<JobRow, 'applied' | 'contacted'>[] {

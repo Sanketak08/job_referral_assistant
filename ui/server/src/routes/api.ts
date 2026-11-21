@@ -44,8 +44,9 @@ apiRouter.get('/app', (_req, res: Response<AppInfo>) => {
   });
 });
 
-apiRouter.get('/outputs', (_req, res: Response<Outputs>) => {
-  res.json(readOutputs());
+apiRouter.get('/outputs', (req: Request, res: Response<Outputs>) => {
+  const file = typeof req.query.jobsFile === 'string' ? req.query.jobsFile : undefined;
+  res.json(readOutputs(file));
 });
 
 /** Resolves :tab and rejects when it is unknown or (for starting runs) busy. */

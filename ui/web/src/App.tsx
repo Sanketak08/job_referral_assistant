@@ -8,7 +8,7 @@ import { useLive } from './hooks/useLive.ts';
 import { useOutputs } from './hooks/useOutputs.ts';
 import { useTheme } from './hooks/useTheme.ts';
 import { groupRuns, tabStatus, type RunView, type TabStatus } from './tabs/runs.ts';
-import { newJobCount, resultsFor } from './tabs/results.tsx';
+import { resultsFor } from './tabs/results.tsx';
 import { TabView } from './tabs/TabView.tsx';
 import { HistoryPage } from './pages/HistoryPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
@@ -21,7 +21,8 @@ export function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const { events, sessions, connected, outputsVersion } = useLive();
-  const outputs = useOutputs(outputsVersion);
+  const [jobsFile, setJobsFile] = useState<string | null>(null);
+  const outputs = useOutputs(outputsVersion, jobsFile);
 
   useEffect(() => {
     api
@@ -64,7 +65,7 @@ export function App() {
       <Sidebar
         tabs={app?.tabs ?? []}
         statuses={statuses}
-        counts={{ search: newJobCount(outputs) }}
+        counts={{ search: outputs.newInLatest }}
         view={activeTab?.id ?? view}
         onNavigate={go}
         collapsed={collapsed}
@@ -94,7 +95,13 @@ export function App() {
             info={activeTab}
             runs={runsByTab.get(activeTab.id) ?? []}
             sessionId={sessions[activeTab.id] ?? null}
-            results={resultsFor(activeTab.id, outputs, app?.tabs ?? [], handoff)}
+            results={resultsFor(activeTab.id, {
+              outputs,
+              tabs: app?.tabs ?? [],
+              handoff,
+              jobsFile,
+              onSelectJobsFile: setJobsFile,
+            })}
           />
         )}
       </main>

@@ -17,12 +17,17 @@ import type { ResultsView } from './TabView.tsx';
 export type Handoff = (tab: TabId, jobs: JobRef[]) => void;
 
 /** The table each tab shows next to Activity, built from the output/ CSVs. */
-export function resultsFor(
-  tab: TabId,
-  outputs: Outputs,
-  tabs: TabInfo[],
-  handoff: Handoff,
-): ResultsView | undefined {
+export interface ResultsContext {
+  outputs: Outputs;
+  tabs: TabInfo[];
+  handoff: Handoff;
+  /** The daily_jobs CSV picked in the Matches dropdown; null means the newest. */
+  jobsFile: string | null;
+  onSelectJobsFile: (name: string | null) => void;
+}
+
+export function resultsFor(tab: TabId, ctx: ResultsContext): ResultsView | undefined {
+  const { outputs, tabs, handoff } = ctx;
   switch (tab) {
     case 'search': {
       const targets = tabs.filter((t) => t.acceptsJobs);
@@ -33,6 +38,9 @@ export function resultsFor(
           <MatchesTable
             jobs={outputs.jobs}
             jobsFile={outputs.jobsFile}
+            files={outputs.jobsFiles}
+            selectedFile={ctx.jobsFile}
+            onSelectFile={ctx.onSelectJobsFile}
             selectionActions={(jobs, clear) =>
               targets.map((t) => (
                 <button
@@ -92,11 +100,6 @@ export function resultsFor(
         ),
       };
   }
-}
-
-/** Sidebar badge: matches you have not applied to yet. */
-export function newJobCount(outputs: Outputs): number {
-  return outputs.jobs.filter((job) => !job.applied).length;
 }
 
 function toRef(job: JobRow): JobRef {

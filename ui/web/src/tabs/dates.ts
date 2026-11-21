@@ -25,3 +25,16 @@ export function shortDateTime(iso: string): string {
     minute: '2-digit',
   });
 }
+
+/** "daily_jobs_2026-11-20_221223.csv" → "Nov 20, 22:12". Falls back to the file name. */
+export function jobsFileLabel(name: string): string {
+  const m = /(\d{4})-(\d{2})-(\d{2})_(\d{2})(\d{2})(\d{2})/.exec(name);
+  if (!m) return name;
+  const [, y, mo, d, h, mi] = m.map(Number) as [number, number, number, number, number, number];
+  return new Date(y, mo - 1, d, h, mi).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
